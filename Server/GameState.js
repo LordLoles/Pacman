@@ -1,5 +1,6 @@
 var Maps = require('./Map.js');
 var Player = require('./Player.js');
+var CoinSpawner = require('./CoinSpawner.js');
 var drawMap = require('./WorldProcessing.js');
 var GameLogic = require('./GameLogic.js');
 const performance = require('perf_hooks').performance;
@@ -9,7 +10,7 @@ class GameState {
 
     
     constructor(noPlayers) {
-        this.map = new Maps.TestMap();
+        this.map = new Maps.ClassicMap();
         this.gameLogic = new GameLogic(this.map);
         this.world = "";
         this.pacman; //id of player
@@ -48,14 +49,14 @@ class GameState {
                 return;
         }
 
-        console.log("moving", player, "to", newX, newY);
+        //console.log("moving", player, "to", newX, newY);
 
         if (this.gameLogic.canMove(player, newX, newY, this.pacman)) {
             //console.log("can move here", playerID, "->", newX, newY);
             this.gameLogic.movePlayer(player, newX, newY, this.pacman);
 
             //console.log("player", player);
-            console.log("map", this.map.field);
+            //console.log("map", this.map.field);
             //console.log("move done");
             this.moveDone(playerID);
         }
@@ -65,15 +66,17 @@ class GameState {
     moveDone(playerID){
         var player = this.players[playerID];
         if (this.pacmanOnCoin(player)){
-            TODO
+            player.points += 1;
+            this.map.field[player.x][player.y] -= 10;
         }
         if (this.gameLogic.pacmanEaten != -1){
+            if (playerID == this.pacman || playerID == this.gameLogic.pacmanEaten){
+                this.pacman = this.gameLogic.pacmanEaten;
+                //console.log("new pacman", this.pacman);
+                this.gameLogic.spawnGhost(this.players[this.pacman], this.pacman);
 
-            this.pacman = this.gameLogic.pacmanEaten;
-            //console.log("new pacman", this.pacman);
-            this.gameLogic.spawnGhost(this.players[this.pacman], this.pacman);
-
-            this.gameLogic.pacmanEaten = -1;
+                this.gameLogic.pacmanEaten = -1;
+            }
         }
     }
 

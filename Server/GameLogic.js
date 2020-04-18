@@ -65,8 +65,13 @@ class GameLogic {
     // player is object, pacman is ID
     spawnGhost(player, pacman){
         var freeSpawns = this.map.getFreeSpawns();
-        var spawn = freeSpawns[Math.floor(Math.random() * freeSpawns.length)];
-        this.movePlayerTo(player, spawn[0], spawn[1], pacman);
+        if (freeSpawns.length > 0){
+            var spawn = freeSpawns[Math.floor(Math.random() * freeSpawns.length)];
+            this.movePlayerTo(player, spawn[0], spawn[1], pacman);
+        }
+        else {
+            setTimeout(this.spawnGhost(player, pacman), 500);
+        }
     }
 }
 

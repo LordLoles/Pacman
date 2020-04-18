@@ -30,13 +30,13 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('change', function(event){
-		console.log("command " + event.change + " from player " + socket.playerID);
+		//console.log("command " + event.change + " from player " + socket.playerID);
 		gameState.move(socket.playerID, event.change);
 	});
 });
 
 
-let intervalTime = 200;
+let intervalTime = 50;
 setInterval(sendGameState, intervalTime);
 
 function sendGameState(){
