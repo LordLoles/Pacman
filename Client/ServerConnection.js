@@ -5,7 +5,7 @@ class ServerConnection {
 
     constructor(){
         //this.socket = io.connect("http://localhost:8886");
-        this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
+        this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com:8886");
         this.id;
 
         console.log("listening for changes");
