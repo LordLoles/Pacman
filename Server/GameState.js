@@ -69,7 +69,7 @@ class GameState {
             this.map.field[player.x][player.y] -= 10;
         }
         if (this.gameLogic.pacmanEaten != -1){
-            let eating = gameLogic.pacmanEaten;
+            let eating = this.gameLogic.pacmanEaten;
             let eaten = this.pacman;
             if (playerID == eating || playerID == eaten){
                 this.pacman = this.gameLogic.pacmanEaten;

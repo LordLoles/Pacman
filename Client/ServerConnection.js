@@ -4,8 +4,8 @@ import displayGame from './Display.js';
 class ServerConnection {
 
     constructor(){
-        //Display.display();
-        this.socket = io.connect("http://localhost:8886");
+        //this.socket = io.connect("http://localhost:8886");
+        this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
 
         console.log("listening for changes");
