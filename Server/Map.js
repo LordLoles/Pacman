@@ -1,3 +1,4 @@
+var CoinSpawner = require('./CoinSpawner.js');
 
 /* 
 Maps field legend:
@@ -28,10 +29,10 @@ class AbstractMap {
         this.coinSpawner;
     }
 
-    finish(){
+    finish(map, min = 2000, max = 7000){
         this.width = this.field.length;
         this.height = this.field[0].length;
-        this.coinSpawner = new CoinSpawner(this.map);
+        this.coinSpawner = new CoinSpawner(map, min, max);
     }
 
     find(code){
@@ -94,7 +95,7 @@ class ClassicMap extends AbstractMap {
             [5, 5, 5, 5, 6, 5, 5, 5, 6, 5, 6, 5, 5, 5, 6, 5, 5, 5, 5], //6
             [5, 5, 5, 5, 6, 5, 6, 6, 6, 6, 6, 6, 6, 5, 6, 5, 5, 5, 5], //7
             [5, 5, 5, 5, 6, 5, 6, 5, 5, 6, 5, 5, 6, 5, 6, 5, 5, 5, 5], //8
-            [5, 5, 5, 5, 6, 6, 6, 5, 6, 6, 6, 5, 6, 6, 6, 5, 5, 5, 5], //9
+            [5, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 5], //9
             [5, 5, 5, 5, 6, 5, 6, 5, 5, 6, 5, 5, 6, 5, 6, 5, 5, 5, 5], //10
             [5, 5, 5, 5, 6, 5, 6, 6, 6, 6, 6, 6, 6, 5, 6, 5, 5, 5, 5], //11
             [5, 5, 5, 5, 6, 5, 6, 5, 5, 5, 5, 5, 6, 5, 6, 5, 5, 5, 5], //12
@@ -119,7 +120,7 @@ class ClassicMap extends AbstractMap {
         //pacmanspawn
         this.field[9][4] = 0;
 
-        this.finish();
+        this.finish(this, 1500, 4000);
       }
 
 }
@@ -137,12 +138,11 @@ class TestMap extends AbstractMap {
             [5, 5, 6]
         ];
 
-        this.width = this.field.length;
-        this.height = this.field[0].length;
-
         this.spawns = new Array(2);
         this.spawns[0] = [0,2];
         this.spawns[1] = [2,2];
+
+        this.finish(this);
     }
 
 }

@@ -1,10 +1,10 @@
 class CoinSpawner {
 
-    constructor(map) {
+    constructor(map, min, max) {
         this.map = map;
         this.spawning = true;
-        this.min = 2000;    //minimun time in ms needed for coin to be spawned
-        this.max = 7000;    //maximum time in ms needed for coin to be spawned
+        this.min = min;    //minimun time in ms needed for coin to be spawned
+        this.max = max;    //maximum time in ms needed for coin to be spawned
 
         this.initFillness = 0.3;
 

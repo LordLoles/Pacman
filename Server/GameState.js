@@ -1,6 +1,5 @@
 var Maps = require('./Map.js');
 var Player = require('./Player.js');
-var CoinSpawner = require('./CoinSpawner.js');
 var drawMap = require('./WorldProcessing.js');
 var GameLogic = require('./GameLogic.js');
 const performance = require('perf_hooks').performance;
@@ -70,7 +69,9 @@ class GameState {
             this.map.field[player.x][player.y] -= 10;
         }
         if (this.gameLogic.pacmanEaten != -1){
-            if (playerID == this.pacman || playerID == this.gameLogic.pacmanEaten){
+            let eating = gameLogic.pacmanEaten;
+            let eaten = this.pacman;
+            if (playerID == eating || playerID == eaten){
                 this.pacman = this.gameLogic.pacmanEaten;
                 //console.log("new pacman", this.pacman);
                 this.gameLogic.spawnGhost(this.players[this.pacman], this.pacman);
@@ -95,13 +96,13 @@ class GameState {
         player.y = pacmanPos[1];
         //console.log("pacman found at " + player.x + " " + player.y);
 
-        player.moveSpeed = 250;
+        player.moveSpeed = 190;
         player.lastMove = performance.now() + 250;
     }
 
     setGhost(playerID){
         var player = this.players[playerID]
-        player.moveSpeed = 350;
+        player.moveSpeed = 290;
         player.lastMove = performance.now() + 1000;
     }
 
