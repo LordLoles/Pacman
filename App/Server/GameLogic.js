@@ -4,7 +4,7 @@ class GameLogic {
 
     constructor(map) {
         this.map = map;
-        this.pacmanEaten = false;
+        this.pacmanEaten = -1; //id of player that had eaten pacman on move, or -1 if none had.
     }
 
     canMove(player, newX, newY, pacman){
@@ -47,10 +47,10 @@ class GameLogic {
         else if (pos == 7) this.map.field[newX][newY] = player.id + 10;
         else if (pos == pacman) {
             this.map.field[newX][newY] = player.id;
-            this.pacmanEaten = true;
+            this.pacmanEaten = player.id;
         }
         else if (pos <= 4 && (player.id == pacman)){
-            this.pacmanEaten = true;
+            this.pacmanEaten = pos;
         }
         else throw new TypeError("Invalid move! ", player.id, newX, newY);
 
@@ -62,6 +62,7 @@ class GameLogic {
         //console.log("map", this.map.field);
     }
 
+    // player is object, pacman is ID
     spawnGhost(player, pacman){
         var freeSpawns = this.map.getFreeSpawns();
         var spawn = freeSpawns[Math.floor(Math.random() * freeSpawns.length)];

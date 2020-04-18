@@ -67,8 +67,13 @@ class GameState {
         if (this.pacmanOnCoin(player)){
             TODO
         }
-        if (this.gameLogic.pacmanEaten){
-            TODO
+        if (this.gameLogic.pacmanEaten != -1){
+
+            this.pacman = this.gameLogic.pacmanEaten;
+            //console.log("new pacman", this.pacman);
+            this.gameLogic.spawnGhost(this.players[this.pacman], this.pacman);
+
+            this.gameLogic.pacmanEaten = -1;
         }
     }
 
