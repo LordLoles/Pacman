@@ -41,5 +41,8 @@ setInterval(sendGameState, intervalTime);
 
 function sendGameState(){
 	//console.log('sending changed state to all');
-	if (gameState != undefined) io.sockets.emit('change', gameState.worldToAjax());
+	if (gameState != undefined) io.sockets.emit('change', {
+		world: gameState.worldToAjax(),
+		gameInfo: gameState.gameInfoToAjax()
+	});
 }

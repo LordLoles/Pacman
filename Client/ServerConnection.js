@@ -1,12 +1,13 @@
-import displayGame from './Display.js';
+import Display from './Display.js';
 
 
 class ServerConnection {
 
     constructor(){
-        this.socket = io.connect("http://localhost:8886");
-        //this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com:8886");
+        //this.socket = io.connect("http://localhost:8886");
+        this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
+        this.display = new Display();
 
         console.log("listening for changes");
         this.listenForChanges();
@@ -27,8 +28,10 @@ class ServerConnection {
     }
 
     listenForChanges(){
+        var display = this.display;
         this.socket.on('change', function(state){
-            displayGame(state);
+            display.displayWorld(state.world);
+            display.displayGameInfo(state.gameInfo);
         });
     }
 

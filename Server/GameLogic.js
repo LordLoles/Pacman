@@ -14,7 +14,8 @@ class GameLogic {
         var pos = this.map.field[newX][newY];
 
         if (
-            ((pos == pacman) || (pos == 6) || (pos == 7) || ((pos <= 4) && (player.id == pacman)))
+            ((pos == pacman) || (pos == 6) || (pos == 7) || 
+                ((player.id == pacman) && ((pos <= 4) || (pos <= 14 && pos >= 10))))
             &&
             (player.lastMove + player.moveSpeed <= performance.now())
         ) return true;
@@ -49,8 +50,11 @@ class GameLogic {
             this.map.field[newX][newY] = player.id;
             this.pacmanEaten = player.id;
         }
-        else if (pos <= 4 && (player.id == pacman)){
+        else if ((player.id == pacman) && (pos <= 4)){
             this.pacmanEaten = pos;
+        }
+        else if ((player.id == pacman) && (pos <= 14 && pos >= 10)){
+            this.pacmanEaten = pos - 10;
         }
         else throw new TypeError("Invalid move! ", player.id, newX, newY);
 
