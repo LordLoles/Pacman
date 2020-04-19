@@ -52,6 +52,41 @@
     display: inline-block;
     background-image: url('./Assets/ghost4.png');
 }
+.color0 {
+    color: rgb(126, 223, 255);
+}
+.color1 {
+    color: rgb(212, 3, 212);
+}
+.color2 {
+    color: lightgrey;
+}
+.color3 {
+    color: rgb(116, 255, 116);
+}
+.color4 {
+    color: red;
+}
+.colorp {
+    color: yellow;
+}
+#gameInfo {
+    display: grid;
+    grid-template-rows: 40% 60%;
+    font-weight: bold;
+    text-align: center;
+}
+#score {
+    display: grid;
+    grid-template-rows: 15% 15% 15% 15% 15% auto;
+    font-size: 6vw;
+    font-size: 10vh;
+}
+body {
+    background-color: black;
+    display: grid;
+    grid-template-columns: 70% 30%;
+}
 div {
     line-height: 0px;
 }

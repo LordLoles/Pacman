@@ -11,17 +11,10 @@ class CoinSpawner {
         this.initialSpawn();
         this.spawner();
     }
-    
-    shuffle(a) {
-        for (let i = a.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-    }
 
     initialSpawn(){
-        var freeCoinPos = this.shuffle(this.map.getFreeCoinPos());
+        var freeCoinPos = this.map.getFreeCoinPos();
+        freeCoinPos.shuffle();
         freeCoinPos = freeCoinPos.slice(Math.floor((1 - this.initFillness) * freeCoinPos.length));
         for (let i = 0; i < freeCoinPos.length; i++){
             this.spawn(freeCoinPos[i]);

@@ -57,7 +57,8 @@ function drawPlayer(gameState, id) {
 }
 
 function drawGameInfo(gameState) {
-    var players = gameState.players.sort((a, b) => b - a);
+    var players = Array.from(gameState.players);
+    players.sort((a, b) => b.points - a.points);
 
     var gameInfo = "";
 
@@ -68,11 +69,13 @@ function drawGameInfo(gameState) {
     gameInfo += "<div id='score'>";
 
     players.forEach(player => {
-        gameInfo += "<div id='color" + player.id + "'>";
-        gameInfo += player.id; //player.name TODO
-        gameInfo += " -> " + player.points;
-        gameInfo += "</div>"
+        gameInfo += "<div class='color";
+        gameInfo += (gameState.pacman == player.id) ? "p" : player.id;
+        gameInfo += "'>";
 
+        gameInfo += "<span>" + player.id + "</span>"; //player.name TODO
+        gameInfo += " => " + player.points;
+        gameInfo += "</div>"
     });
 
     gameInfo += "</div>";
