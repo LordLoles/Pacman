@@ -4,8 +4,8 @@ import Display from './Display.js';
 class ServerConnection {
 
     constructor(){
-        this.socket = io.connect("http://localhost:8886");
-        //this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
+        //this.socket = io.connect("http://localhost:8886");
+        this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
         this.display = new Display();
 
