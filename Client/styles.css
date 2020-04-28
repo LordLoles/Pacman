@@ -82,10 +82,31 @@
     font-size: 6vw;
     font-size: 10vh;
 }
+.menu{
+    display: grid;
+    grid-template-rows: 15% 35% 50%;
+    width: 100%;
+    height: 100%;
+}
+.menu div{
+    margin: auto;
+}
+.login input, .login label, .login button{
+    margin: 5%;
+}
+label{
+    color: white;
+}
 body {
     background-color: black;
     display: grid;
     grid-template-columns: 70% 30%;
+    width: 100%;
+    height: 100%;
+}
+html{
+    width: 100%;
+    height: 100%;
 }
 div {
     line-height: 0px;

@@ -11,6 +11,8 @@ app.use(express.static('Client'));
 
 
 var io = socket(server);
+var menuPage = new (require('./Server/MenuPage.js'))();
+console.log(menuPage);
 
 var playerID = 0;
 
@@ -34,6 +36,10 @@ io.on('connection', function(socket){
 		//console.log("command " + event.change + " from player " + socket.playerID);
 		gameState.move(socket.playerID, event.change);
 	});
+
+	socket.on('menu', function(){
+		sendPage('menu', menuPage.getMenu(), "");
+	});
 });
 
 Array.prototype.shuffle = function() {
@@ -43,14 +49,24 @@ Array.prototype.shuffle = function() {
 	}
 }
 
+function sendPage(tag, main, sec){
+	io.sockets.emit(tag, {
+		world: main,
+		gameInfo: sec
+	});
+}
 
-let intervalTime = 50;
-setInterval(sendGameState, intervalTime);
+function gameStarted(){
+	let intervalTime = 50;
+	setInterval(sendGameState, intervalTime);
+}
+
+function gameFinished(){
+	clearInterval(sendGameState);
+}
 
 function sendGameState(){
 	//console.log('sending changed state to all');
-	if (gameState != undefined) io.sockets.emit('change', {
-		world: gameState.worldToAjax(),
-		gameInfo: gameState.gameInfoToAjax()
-	});
+	if (gameState != undefined) 
+		sendPage('change', gameState.worldToAjax(), gameState.gameInfoToAjax());
 }
