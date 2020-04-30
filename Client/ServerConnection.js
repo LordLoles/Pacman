@@ -38,20 +38,35 @@ class ServerConnection {
 
     listenForMenu(){
         var display = this.display;
+        var logged = false;
+        var ready = false;
+        var socket = this.socket;
+
         this.socket.on('menu', function(state){
-            display.displayWorld(state.world);
-            display.displayGameInfo(state.gameInfo);
+            display.displayWorld(state.main);
+            display.displayGameInfo(state.info);
+            logged = state.logged;
+            ready = state.ready;
 
             document.getElementById("readybtn").addEventListener("click", function(){
                 console.log("ready");
+                socket.emit("ready", null);
             });
 
             document.getElementById("loginbtn").addEventListener("click", function(){
                 console.log("login");
+                socket.emit("login", {
+                    name: document.getElementById("lname").value,
+                    pass: document.getElementById("lpass").value
+                });
             });
 
             document.getElementById("regbtn").addEventListener("click", function(){
                 console.log("reg");
+                socket.emit("reg", {
+                    name: document.getElementById("lname").value,
+                    pass: document.getElementById("lpass").value
+                });
             });
         });
     }

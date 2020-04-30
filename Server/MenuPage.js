@@ -1,11 +1,34 @@
 class MenuPage {
 
-    getMenu(){
+    constructor(){
+        this.playersReady = new Array();
+    }
+
+    addReadyPlayer(playerID){
+        if (this.playersReady.includes(playerID)) return;
+        if (!this.canAddReadyPlayer()) throw "there are already 5 players ready!";
+        this.playersReady.push(playerID);
+    }
+
+    removeReadyPlayer(playerID){
+        console.log("players index:", this.playersReady.findIndex(e => e == playerID));
+        this.playersReady.splice(this.playersReady.findIndex(e => e == playerID), 1);
+    }
+
+    canAddReadyPlayer(){
+        return this.playersReady.length < 5;
+    }
+
+    getMainMenu(ready, logged){
+        var color;
+        if(!logged) color = "grey";
+        else if (ready) color = "green";
+        else color = "#FF6464";
         return '' +
         '<div class="menu">' +
 
             '<div class="readyButton">' +
-                '<button id="readybtn" type="button">READY!</button>' +
+                '<button style="background-color: ' + color + '; border-color: ' + color + ';" id="readybtn" type="button">READY!</button>' +
             '</div>' +
 
             '<div class="login">' +
