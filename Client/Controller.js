@@ -2,14 +2,14 @@ import ServerConnection from './ServerConnection.js';
 
 var serverConnection = new ServerConnection();
 
-menu();
 
 
-
+/*
 function menu(){
     console.log('sending menu site request');
     serverConnection.sendRequest('menu');
 }
+*/
 
 function game() {
     console.log('sending id request');

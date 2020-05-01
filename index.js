@@ -11,28 +11,32 @@ app.use(express.static('Client'));
 
 
 var io = socket(server);
-var menuPage = new (require('./Server/MenuPage.js'))();
+var menuPage = new (require('./Server/MenuPage.js'))(require('./Server/Timer.js'), preparationStarted);
 var DBConnection = new (require('./Server/DBConnection.js'))();
+
+var connected = {};
 
 let gameState;
 
+menuStarted();
 
 // All the listenings
 io.on('connection', function(socket){
 	console.log("made socket connecton");
-	var playerID = undefined;
-	var logged = false;
-	var ready = false;
+	initPlayer();
 
 
-	function sendMenuPage(main, sec){
+	function initPlayer(){
+		connected[socket.id] = {socket: socket, logged: false, ready: false};
+	}
+
+	function sendMenuPage(){
 		socket.emit("menu", {
-			main: main,
-			info: sec
+			main: menuPage.getMainMenu(connected[socket.id].ready, connected[socket.id].logged)
 		});
 	}
 
-	
+
 	socket.on('id', function(event, ackCallback){
 		console.log('recieved id request');
 		//ackCallback(playerID);
@@ -45,49 +49,58 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('menu', function(){
-		sendMenuPage(menuPage.getMainMenu(false, false), "");
+		sendMenuPage();
 	});
 
 	socket.on('ready', function(){
-		logged = playerID != undefined;
-		if (logged) {
-			if (ready){
-				ready = false;
-				menuPage.removeReadyPlayer(playerID);
+		
+		connected[socket.id].logged = connected[socket.id].playerID != undefined;
+		if (connected[socket.id].logged) {
+			if (connected[socket.id].ready){
+				connected[socket.id].ready = false;
+				menuPage.removeReadyPlayer(connected[socket.id].playerID);
 			} else if (menuPage.canAddReadyPlayer()){
-				ready = true;
-				menuPage.addReadyPlayer(playerID);
+				connected[socket.id].ready = true;
+				menuPage.addReadyPlayer(connected[socket.id].playerID, connected[socket.id].playerName);
 			}
 		}
-		sendMenuPage(menuPage.getMainMenu(ready, logged), "");
+		console.log("players ready:", menuPage.playersReady);
+		sendMenuPage();
 	});
 
 	socket.on('login', function(state){
+		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		initPlayer();
 		console.log("login", state);
 		var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
 		if (format.test(state.name) || format.test(state.pass)) {
 			socket.emit("err", {
-				text: "name or password can not contain any special character!"
+				text: "name or password can not contain special characters!"
 			});
 		}
 		else {
-			playerID = DBConnection.getPlayerID(state.name, state.pass);
-			if (playerID == undefined) {
+			connected[socket.id].playerID = DBConnection.getPlayerID(state.name, state.pass);
+			if (connected[socket.id].playerID == undefined) {
 				socket.emit("err", {
 					text: "incorrect name or password!"
 				});
 			} else {
-				logged = true;
-				sendMenuPage(menuPage.getMainMenu(ready, logged), "");
+				connected[socket.id].logged = true;
+				connected[socket.id].playerName = state.name;
+				sendMenuPage(menuPage.getMainMenu(connected[socket.id].ready, connected[socket.id].logged), "");
 			}
 		}
 	});
 
 	socket.on('reg', function(state){
+		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		initPlayer();
         console.log('reg');
 	});
 
     socket.on('disconnect', function () {
+		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		initPlayer();
         console.log('user disconnected');
 	});
 	
@@ -102,6 +115,8 @@ Array.prototype.shuffle = function() {
 	}
 }
 
+
+
 function sendGameStateToAll(tag, main, sec){
 	io.sockets.emit(tag, {
 		world: main,
@@ -109,13 +124,32 @@ function sendGameStateToAll(tag, main, sec){
 	});
 }
 
+function sendMenuPageToAll(){
+	Object.values(connected).forEach(e => {
+		e.socket.emit("menu", {
+			main: menuPage.getMainMenu(e.ready, e.logged)
+		});
+	});
+}
+
+function menuStarted(){
+	setInterval(sendMenuPageToAll, 1000);
+}
+
+
+TODO
+function preparationStarted(){
+	console.log("hiiiir");
+}
+
+var sendGameStateID;
 function gameStarted(){
 	let intervalTime = 50;
-	setInterval(sendGameState, intervalTime);
+	sendGameStateID = setInterval(sendGameState, intervalTime);
 }
 
 function gameFinished(){
-	clearInterval(sendGameState);
+	clearInterval(sendGameStateID);
 }
 
 function sendGameState(){
