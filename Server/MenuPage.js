@@ -10,11 +10,12 @@ class MenuPage {
     addReadyPlayer(playerID, playerName){
         if (this.playersReady[playerID] != undefined) return;
         if (!this.canAddReadyPlayer()) throw "there are already 5 players ready!";
+
         this.playersReady[playerID] = playerName;
 
         var playersReadyLength = this.playersReadyLength();
         if (playersReadyLength >= 2 && playersReadyLength < 5){
-            this.newTimerStart(5);
+            this.newTimerStart(2);
         } else if (playersReadyLength == 5) {
             this.newTimerStart(3);
         } else {

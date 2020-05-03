@@ -11,12 +11,17 @@ app.use(express.static('Client'));
 
 
 var io = socket(server);
-var menuPage = new (require('./Server/MenuPage.js'))(require('./Server/Timer.js'), preparationStarted);
+var Timer = require('./Server/Timer.js');
+var menuPage = new (require('./Server/MenuPage.js'))(Timer, preparationStarted);
 var DBConnection = new (require('./Server/DBConnection.js'))();
 
 var connected = {};
 
 let gameState;
+
+var sendGameStateID;
+var sendManuPageToAllID;
+var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
 menuStarted();
 
@@ -40,12 +45,13 @@ io.on('connection', function(socket){
 	socket.on('id', function(event, ackCallback){
 		console.log('recieved id request');
 		//ackCallback(playerID);
-		//gameState = new (require('./Server/GameState.js'))(playerID);
+		//gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame);
 	});
 
 	socket.on('change', function(event){
 		//console.log("command " + event.change + " from player " + socket.playerID);
-		gameState.move(socket.playerID, event.change);
+		var ingameID = playerIDbyDBID(socket.playerID)
+		if (ingameID) gameState.move(ingameID, event.change);
 	});
 
 	socket.on('menu', function(){
@@ -116,6 +122,12 @@ Array.prototype.shuffle = function() {
 }
 
 
+function playerIDbyDBID(dbID){
+	for (var i = 0; i < Object.keys(mappedPlayersInGame).length; i++){
+		if (mappedPlayersInGame[i]["id"] === dbID) return i;
+	}
+	return undefined;
+}
 
 function sendGameStateToAll(tag, main, sec){
 	io.sockets.emit(tag, {
@@ -132,20 +144,20 @@ function sendMenuPageToAll(){
 	});
 }
 
+
 function menuStarted(){
-	setInterval(sendMenuPageToAll, 1000);
+	sendManuPageToAllID = setInterval(sendMenuPageToAll, 1000);
 }
 
 
-TODO
 function preparationStarted(){
-	console.log("hiiiir");
+	var preparationPage = new (require('./Server/PreparationPage.js'))(menuPage.playersReady, gameStarted);
+	mappedPlayersInGame = preparationPage.players;
 }
 
-var sendGameStateID;
+
 function gameStarted(){
-	let intervalTime = 50;
-	sendGameStateID = setInterval(sendGameState, intervalTime);
+	sendGameStateID = setInterval(sendGameState, 50);
 }
 
 function gameFinished(){

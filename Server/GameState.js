@@ -8,12 +8,13 @@ const performance = require('perf_hooks').performance;
 class GameState {
 
     
-    constructor(noPlayers) {
+    constructor(mapped) {
         this.map = new Maps.ClassicMap();
         this.gameLogic = new GameLogic(this.map);
         this.pacman; //id of player
         this.ghostSpeed = 290;
         this.pacmanSpeed = 190;
+        var noPlayers = Object.keys(mapped).length;
 
         this.players = new Array (noPlayers);
         for(var i = 0; i < noPlayers; i++){

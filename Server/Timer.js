@@ -29,7 +29,7 @@ class Timer {
     }
 
     toHTML(){
-        return '<p>Time</p>' +
+        return '<p>Time left</p>' +
             '<p>' + this.left + '</p><br>';
     }
 
