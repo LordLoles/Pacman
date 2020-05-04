@@ -10,17 +10,27 @@ var server = app.listen (PORT, function(){
 app.use(express.static('Client'));
 
 
+Array.prototype.shuffle = function() {
+	for (let i = this.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[this[i], this[j]] = [this[j], this[i]];
+	}
+}
+
+
 var io = socket(server);
-var Timer = require('./Server/Timer.js');
-var menuPage = new (require('./Server/MenuPage.js'))(Timer, preparationStarted);
+var menuPage = new (require('./Server/MenuPage.js'))(preparationStarted);
 var DBConnection = new (require('./Server/DBConnection.js'))();
+var Maps = require('./Server/Map.js');
 
 var connected = {};
+var map = new Maps.ClassicMap();
 
 let gameState;
 
 var sendGameStateID;
 var sendManuPageToAllID;
+var sendPreparationPageToAllID;
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
 menuStarted();
@@ -45,7 +55,7 @@ io.on('connection', function(socket){
 	socket.on('id', function(event, ackCallback){
 		console.log('recieved id request');
 		//ackCallback(playerID);
-		//gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame);
+		//gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame, map);
 	});
 
 	socket.on('change', function(event){
@@ -114,13 +124,6 @@ io.on('connection', function(socket){
 
 
 
-Array.prototype.shuffle = function() {
-	for (let i = this.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[this[i], this[j]] = [this[j], this[i]];
-	}
-}
-
 
 function playerIDbyDBID(dbID){
 	for (var i = 0; i < Object.keys(mappedPlayersInGame).length; i++){
@@ -128,6 +131,7 @@ function playerIDbyDBID(dbID){
 	}
 	return undefined;
 }
+
 
 function sendGameStateToAll(tag, main, sec){
 	io.sockets.emit(tag, {
@@ -144,6 +148,22 @@ function sendMenuPageToAll(){
 	});
 }
 
+function sendPreparationPageToAll(preparationPage){
+	var pageHTML = preparationPage.getMainMenu();
+	var timerHTML = preparationPage.getTimerHTML();
+	var length = Object.values(connected).length;
+
+	for(var i = 0; i < length; i++){
+		connected.socket.emit("preparation", {
+			id: i,
+			width: map.width,
+			height: map.height,
+			main: pageHTML,
+			timer: timerHTML
+		});
+	}
+}
+
 
 function menuStarted(){
 	sendManuPageToAllID = setInterval(sendMenuPageToAll, 1000);
@@ -151,8 +171,10 @@ function menuStarted(){
 
 
 function preparationStarted(){
+	clearInterval(sendMenuPageToAllID);
 	var preparationPage = new (require('./Server/PreparationPage.js'))(menuPage.playersReady, gameStarted);
 	mappedPlayersInGame = preparationPage.players;
+	sendPreparationPageToAllID = setInterval(sendPreparationPageToAll, 1000);
 }
 
 
@@ -163,6 +185,7 @@ function gameStarted(){
 function gameFinished(){
 	clearInterval(sendGameStateID);
 }
+
 
 function sendGameState(){
 	//console.log('sending changed state to all');

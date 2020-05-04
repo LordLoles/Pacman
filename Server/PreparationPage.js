@@ -1,13 +1,14 @@
+var Timer = require('./Timer.js');
+
 class PreparationPage {
 
     constructor(playersReady, TimerClass, functionAfter){
-        this.functionAfter = functionAfter;
         this.TimerClass = TimerClass;
-        this.timer = new this.TimerClass(5, this.functionAfter);
-        this.players = this.mapPlayers(playersReady);
+        this.timer = new Timer(5, functionAfter);
+        this.players = this.mapPlayers(playersReady); // {ingameID { id: DBID, name: DBname}}
+        this.noPlayers = Object.keys(this.players).length;
+        console.log("timer:", this.timer);
         this.timer.start();
-        this.preparationPageHTML1 = '';
-        this.preparationPageHTML2 = '';
     }
 
     mapPlayers(playersReady){
@@ -34,6 +35,30 @@ class PreparationPage {
         */
 
         return mapped;
+    }
+
+    getPlayerHTML(id){
+        return '' +
+            '<div class="player' + id + '">' +
+                '<div class="ghost' + id + '"></div>' +
+                '<p>' + this.players[id].name + '</p>' +
+            '</div>'
+        ;
+    }
+
+    getMainHTML(){
+        var ret = '<div class="preparation"> <div class="stats">Game starting</div> <div class="players">';
+        for(var i = 0; i < this.players; i++){
+            ret += this.getPlayerHTML(i);
+        }
+        ret += '<div class"playerp"><div class"pacman"></div><p>' + this.players[0].name + '<br>starts as pacman!</p></div>';
+        ret += '</div></div>';
+
+        return ret;
+    }
+
+    getTimerHTML(){
+        return this.timer.toHTML();
     }
 
 }

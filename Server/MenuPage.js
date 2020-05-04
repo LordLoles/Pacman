@@ -1,10 +1,11 @@
+var Timer = require('./Timer.js');
+
 class MenuPage {
 
-    constructor(TimerClass, functionAfter){
+    constructor(functionAfter){
         this.playersReady = {};
         this.functionAfter = functionAfter;
-        this.TimerClass = TimerClass;
-        this.timer = new this.TimerClass('-');
+        this.timer = new Timer('-');
     }
 
     addReadyPlayer(playerID, playerName){
@@ -25,7 +26,7 @@ class MenuPage {
 
     newTimer(seconds){
         this.timer.stop();
-        this.timer = new this.TimerClass(seconds, this.functionAfter);
+        this.timer = new Timer(seconds, this.functionAfter);
     }
 
     newTimerStart(seconds){

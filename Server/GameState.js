@@ -1,4 +1,4 @@
-var Maps = require('./Map.js');
+
 var Player = require('./Player.js');
 var WorldProcessing = require('./WorldProcessing.js');
 var GameLogic = require('./GameLogic.js');
@@ -8,8 +8,8 @@ const performance = require('perf_hooks').performance;
 class GameState {
 
     
-    constructor(mapped) {
-        this.map = new Maps.ClassicMap();
+    constructor(mapped, map) {
+        this.map = map;
         this.gameLogic = new GameLogic(this.map);
         this.pacman; //id of player
         this.ghostSpeed = 290;
