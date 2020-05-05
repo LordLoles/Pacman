@@ -1,6 +1,6 @@
 var express = require('express');
 var socket = require('socket.io');
-var PORT = process.env.PORT || 8886;
+var PORT = process.env.PORT || 5000;
 
 var app = express();
 var server = app.listen (PORT, function(){
@@ -29,7 +29,7 @@ var map = new Maps.ClassicMap();
 let gameState;
 
 var sendGameStateID;
-var sendManuPageToAllID;
+var sendMenuPageToAllID;
 var sendPreparationPageToAllID;
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
@@ -166,7 +166,9 @@ function sendPreparationPageToAll(preparationPage){
 
 
 function menuStarted(){
-	sendManuPageToAllID = setInterval(sendMenuPageToAll, 1000);
+	TODO //nech neposiela vzdy cele menu, login nech sa zachova, alebo nech si klient vyberie, co chce.
+	// rozdel JSON na menu do 3 sekcii podla dovov mozno...
+	sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
 }
 
 

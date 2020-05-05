@@ -1,17 +1,19 @@
 import Display from './Display.js';
+import savePreparationData from './Controller.js';
 
 
 class ServerConnection {
 
     constructor(){
-        this.socket = io.connect("http://localhost:8886");
+        this.socket = io.connect("http://localhost:5000");
         //this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
         this.display = new Display();
 
-        console.log("listening for changes");
-        this.listenForChanges();
+        //console.log("listening");
         this.listenForMenu();
+        this.listenForPreparation();
+        this.listenForChanges();
     }
 
     sendChange(event){
@@ -71,14 +73,28 @@ class ServerConnection {
         });
     }
 
+    listenForPreparation(){
+        var pageHTML;
+        var timerHTML;
+
+
+        this.socket.on('preparation', function(state){
+            TODO // Display preparation stranky zrob
+            console.log(this);
+            savePreparationData(state.id, state.width, state.height);
+        });
+    }
+
+    /*
     requestID(){
         this.sendRecieve('id', null).then(msg => {
             this.id = msg;
             console.log('received id:', this.id);
             this.socket.removeAllListeners("id");
         });
-    }
+    }*/
     
+    /*
     sendRecieve(tag, data) {
         return new Promise((resolve, reject) => {
             //console.log("client sending message with tag " + tag);
@@ -87,7 +103,7 @@ class ServerConnection {
                 resolve(response);
             });
         });
-    }
+    }*/
 
 }
 

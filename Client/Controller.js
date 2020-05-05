@@ -1,7 +1,9 @@
 import ServerConnection from './ServerConnection.js';
 
 var serverConnection = new ServerConnection();
-
+var id;
+var mapWidth;
+var mapHeight;
 
 
 /*
@@ -10,6 +12,19 @@ function menu(){
     serverConnection.sendRequest('menu');
 }
 */
+
+
+
+function savePreparationData(idP, widthP, heightP){
+    id = idP;
+    mapWidth = widthP;
+    mapHeight = heightP;
+    changeMapsCSS();
+}
+
+function changeMapsCSS(){
+
+}
 
 function game() {
     console.log('sending id request');
@@ -35,3 +50,5 @@ function game() {
         }
     };
 }
+
+export default savePreparationData;
