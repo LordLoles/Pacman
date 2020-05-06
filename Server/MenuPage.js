@@ -2,9 +2,10 @@ var Timer = require('./Timer.js');
 
 class MenuPage {
 
-    constructor(functionAfter){
+    constructor(functionAfter, functionWithChange){
         this.playersReady = {};
         this.functionAfter = functionAfter;
+        this.functionWithChange = functionWithChange;
         this.timer = new Timer('-');
     }
 
@@ -26,7 +27,7 @@ class MenuPage {
 
     newTimer(seconds){
         this.timer.stop();
-        this.timer = new Timer(seconds, this.functionAfter);
+        this.timer = new Timer(seconds, this.functionAfter, this.functionWithChange);
     }
 
     newTimerStart(seconds){
@@ -54,8 +55,8 @@ class MenuPage {
         var color = this.colorOfReadyButton(ready, logged);
         return '' +
         '<div class="menu">' +
-            this.getLogin() +
             this.getReadyButton(color) +
+            this.getLogin() +
             this.getTimer() +
         '</div>';
     }
@@ -63,8 +64,12 @@ class MenuPage {
     getReadyButton(color){
         return '' +
         '<div class="readyButton">' +
-            '<button style="background-color: ' + color + '; border-color: ' + color + ';" id="readybtn" type="button">READY!</button>' +
+            this.getReadyButtonInner(color) +
         '</div>';
+    }
+
+    getReadyButtonInner(color){
+        return '<button style="background-color: ' + color + '; border-color: ' + color + ';" id="readybtn" type="button">READY!</button>';
     }
 
     getLogin(){
@@ -82,11 +87,16 @@ class MenuPage {
     getTimer(){
         return '' +
         '<div class="stats">' +
-            '<div class="timer">' +
-                this.timer.toHTML() +
-            '</div>' +
-            this.playersReadyToHTML() +
-        '</div>'
+            this.getTimerInner() +
+        '</div>';
+    }
+
+    getTimerInner(){
+        return '' +
+        '<div class="timer">' +
+            this.timer.toHTML() +
+        '</div>' +
+        this.playersReadyToHTML();;
     }
 
     colorOfReadyButton(ready, logged){

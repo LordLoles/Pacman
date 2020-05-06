@@ -1,6 +1,6 @@
 class Timer {
 
-    constructor(seconds, functionAfter, functionWithDecrease = this.id){
+    constructor(seconds, functionAfter = this.id(), functionWithDecrease = this.id){
         this.left = seconds;
         this.id = undefined;
         this.f = functionAfter;
@@ -15,7 +15,7 @@ class Timer {
         clearInterval(this.id);
     }
 
-    id(){}
+    id(){ return; }
 
     // static-like function
     decrement(timer){
@@ -35,6 +35,10 @@ class Timer {
     toHTML(){
         return '<p>Time left</p>' +
             '<p>' + this.left + '</p><br>';
+    }
+
+    toDivHTML(){
+        return '<div class="timer">' + this.toHTML() + '</div>';
     }
 
 }

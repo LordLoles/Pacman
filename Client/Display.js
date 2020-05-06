@@ -2,17 +2,22 @@ class Display {
 
     constructor(){}
 
-    displayWorld(textAJAX){
-        this.display(textAJAX, "game");
+    displayWorld(text){
+        this.display(text, "game");
     }
 
-    displayGameInfo(textAJAX){
-        this.display(textAJAX, "gameInfo");
+    displayGameInfo(text){
+        this.display(text, "gameInfo");
     }
-    
 
-    display(textAjax, id){
-        document.getElementById(id).innerHTML = textAjax;
+    displayMenu(readyButton, login, timer){
+        if (readyButton) document.getElementsByClassName("readyButton")[0].innerHTML = readyButton;
+        if (login) document.getElementsByClassName("login")[0].innerHTML = login;
+        if (timer) document.getElementsByClassName("stats")[0].innerHTML = timer;
+    }
+
+    display(text, id){
+        document.getElementById(id).innerHTML = text;
     }
 
 }

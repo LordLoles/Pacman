@@ -2,12 +2,11 @@ var Timer = require('./Timer.js');
 
 class PreparationPage {
 
-    constructor(playersReady, TimerClass, functionAfter){
-        this.TimerClass = TimerClass;
+    constructor(playersReady, functionAfter){
         this.timer = new Timer(5, functionAfter);
         this.players = this.mapPlayers(playersReady); // {ingameID { id: DBID, name: DBname}}
         this.noPlayers = Object.keys(this.players).length;
-        console.log("timer:", this.timer);
+        //console.log("timer:", this.timer);
         this.timer.start();
     }
 
@@ -58,7 +57,7 @@ class PreparationPage {
     }
 
     getTimerHTML(){
-        return this.timer.toHTML();
+        return this.timer.toDivHTML();
     }
 
 }

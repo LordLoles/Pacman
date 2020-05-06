@@ -19,7 +19,7 @@ Array.prototype.shuffle = function() {
 
 
 var io = socket(server);
-var menuPage = new (require('./Server/MenuPage.js'))(preparationStarted);
+var menuPage = new (require('./Server/MenuPage.js'))(preparationStarted, sendMenuPageToAll);
 var DBConnection = new (require('./Server/DBConnection.js'))();
 var Maps = require('./Server/Map.js');
 
@@ -33,22 +33,18 @@ var sendMenuPageToAllID;
 var sendPreparationPageToAllID;
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
-menuStarted();
+//menuStarted();
 
 // All the listenings
 io.on('connection', function(socket){
 	console.log("made socket connecton");
 	initPlayer();
+	menuStarted();
+	sendMenuPageToOne(connected[socket.id]);
 
 
 	function initPlayer(){
 		connected[socket.id] = {socket: socket, logged: false, ready: false};
-	}
-
-	function sendMenuPage(){
-		socket.emit("menu", {
-			main: menuPage.getMainMenu(connected[socket.id].ready, connected[socket.id].logged)
-		});
 	}
 
 
@@ -60,12 +56,12 @@ io.on('connection', function(socket){
 
 	socket.on('change', function(event){
 		//console.log("command " + event.change + " from player " + socket.playerID);
-		var ingameID = playerIDbyDBID(socket.playerID)
+		var ingameID = inGameIDbyDBID(socket.playerID)
 		if (ingameID) gameState.move(ingameID, event.change);
 	});
 
 	socket.on('menu', function(){
-		sendMenuPage();
+		sendMenuPageWhole();
 	});
 
 	socket.on('ready', function(){
@@ -81,7 +77,7 @@ io.on('connection', function(socket){
 			}
 		}
 		console.log("players ready:", menuPage.playersReady);
-		sendMenuPage();
+		sendMenuPageToAll();
 	});
 
 	socket.on('login', function(state){
@@ -103,7 +99,7 @@ io.on('connection', function(socket){
 			} else {
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
-				sendMenuPage(menuPage.getMainMenu(connected[socket.id].ready, connected[socket.id].logged), "");
+				sendMenuPageToAll();
 			}
 		}
 	});
@@ -112,6 +108,7 @@ io.on('connection', function(socket){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		initPlayer();
         console.log('reg');
+		sendMenuPageWhole();
 	});
 
     socket.on('disconnect', function () {
@@ -124,10 +121,9 @@ io.on('connection', function(socket){
 
 
 
-
-function playerIDbyDBID(dbID){
+function inGameIDbyDBID(dbID){
 	for (var i = 0; i < Object.keys(mappedPlayersInGame).length; i++){
-		if (mappedPlayersInGame[i]["id"] === dbID) return i;
+		if (mappedPlayersInGame[i]["id"] == dbID) return i;
 	}
 	return undefined;
 }
@@ -140,35 +136,50 @@ function sendGameStateToAll(tag, main, sec){
 	});
 }
 
-function sendMenuPageToAll(){
+function sendMenuPageWhole(){
 	Object.values(connected).forEach(e => {
-		e.socket.emit("menu", {
+		e.socket.emit("menuWhole", {
 			main: menuPage.getMainMenu(e.ready, e.logged)
 		});
 	});
 }
 
-function sendPreparationPageToAll(preparationPage){
-	var pageHTML = preparationPage.getMainMenu();
-	var timerHTML = preparationPage.getTimerHTML();
-	var length = Object.values(connected).length;
+function sendMenuPageToOne(connection){
+	var color = menuPage.colorOfReadyButton(connection.ready, connection.logged);
+	connection.socket.emit("menu", {
+		readyButton: menuPage.getReadyButtonInner(color),
+		timer: menuPage.getTimerInner()
+	});
+}
 
-	for(var i = 0; i < length; i++){
-		connected.socket.emit("preparation", {
-			id: i,
-			width: map.width,
-			height: map.height,
+function sendMenuPageToAll(){
+	Object.values(connected).forEach(e => {
+		sendMenuPageToOne(e);
+	});
+}
+
+function sendPreparationPageToAll(preparationPage){
+	var pageHTML = preparationPage.getMainHTML();
+	var timerHTML = preparationPage.getTimerHTML();
+	var width = map.width;
+	var height = map.height;
+
+	Object.values(connected).forEach(e => {
+		var inGameID = inGameIDbyDBID(e.playerID);
+		e.socket.emit("preparation", {
+			id: inGameID,
+			width: width,
+			height: height,
 			main: pageHTML,
 			timer: timerHTML
 		});
-	}
+	});
 }
 
 
 function menuStarted(){
-	TODO //nech neposiela vzdy cele menu, login nech sa zachova, alebo nech si klient vyberie, co chce.
-	// rozdel JSON na menu do 3 sekcii podla dovov mozno...
-	sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
+	sendMenuPageWhole();
+	//sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
 }
 
 
@@ -176,7 +187,7 @@ function preparationStarted(){
 	clearInterval(sendMenuPageToAllID);
 	var preparationPage = new (require('./Server/PreparationPage.js'))(menuPage.playersReady, gameStarted);
 	mappedPlayersInGame = preparationPage.players;
-	sendPreparationPageToAllID = setInterval(sendPreparationPageToAll, 1000);
+	sendPreparationPageToAllID = setInterval(sendPreparationPageToAll, 1000, preparationPage);
 }
 
 

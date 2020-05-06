@@ -44,15 +44,21 @@ class ServerConnection {
         var ready = false;
         var socket = this.socket;
 
-        this.socket.on('menu', function(state){
+        this.socket.on('menuWhole', function(state){
             display.displayWorld(state.main);
             display.displayGameInfo(state.info);
             logged = state.logged;
             ready = state.ready;
+            console.log("menuWhole");
 
-            document.getElementById("readybtn").addEventListener("click", function(){
-                console.log("ready");
-                socket.emit("ready", null);
+            socket.on("menu", function(state){
+                display.displayMenu(state.readyButton, undefined, state.timer);
+
+                document.getElementById("readybtn").addEventListener("click", function(){
+                    console.log("ready");
+                    socket.emit("ready", null);
+                });
+
             });
 
             document.getElementById("loginbtn").addEventListener("click", function(){
@@ -70,18 +76,17 @@ class ServerConnection {
                     pass: document.getElementById("lpass").value
                 });
             });
+
         });
     }
 
     listenForPreparation(){
-        var pageHTML;
-        var timerHTML;
-
+        var display = this.display;
 
         this.socket.on('preparation', function(state){
-            TODO // Display preparation stranky zrob
-            console.log(this);
             savePreparationData(state.id, state.width, state.height);
+            display.displayWorld(state.main);
+            display.displayGameInfo(state.timer);
         });
     }
 
