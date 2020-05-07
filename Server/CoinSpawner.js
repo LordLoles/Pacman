@@ -9,6 +9,9 @@ class CoinSpawner {
         this.initFillness = 0.3;
 
         this.initialSpawn();
+    }
+
+    startSpawning(){
         this.spawner();
     }
 

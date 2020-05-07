@@ -62,10 +62,8 @@ function drawGameInfo(gameState) {
 
     var gameInfo = "";
 
-    gameInfo += "<div id='time'>";
+    gameInfo += gameState.timer.toDivHTML();
 
-
-    gameInfo += "</div>";
     gameInfo += "<div id='score'>";
 
     players.forEach(player => {
@@ -73,7 +71,7 @@ function drawGameInfo(gameState) {
         gameInfo += (gameState.pacman == player.id) ? "p" : player.id;
         gameInfo += "'>";
 
-        gameInfo += "<span>" + player.id + "</span>"; //player.name TODO
+        gameInfo += "<span>" + gameState.ingameIDtoName(player.id) + "</span>"; //player.name TODO
         gameInfo += " => " + player.points;
         gameInfo += "</div>"
     });

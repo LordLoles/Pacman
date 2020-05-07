@@ -1,10 +1,11 @@
 class Timer {
 
-    constructor(seconds, functionAfter = this.id(), functionWithDecrease = this.id){
+    constructor(seconds, functionAfter = this.id(), functionWithDecrease = this.id, text = "Time Left"){
         this.left = seconds;
         this.id = undefined;
         this.f = functionAfter;
         this.g = functionWithDecrease;
+        this.text = text;
     }
 
     start(){
@@ -32,13 +33,17 @@ class Timer {
         return this.left == 0;
     }
 
-    toHTML(){
-        return '<p>Time left</p>' +
+    toHTML(alternativeText = "Time left"){
+        var text;
+        if (alternativeText == "Time left") text = this.text;
+        else text = alternativeText;
+        
+        return '<p>' + text + '</p>' +
             '<p>' + this.left + '</p><br>';
     }
 
-    toDivHTML(){
-        return '<div class="timer">' + this.toHTML() + '</div>';
+    toDivHTML(text = "Time left"){
+        return '<div class="timer">' + this.toHTML(text) + '</div>';
     }
 
 }

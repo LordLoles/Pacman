@@ -57,7 +57,7 @@ class MenuPage {
         '<div class="menu">' +
             this.getReadyButton(color) +
             this.getLogin() +
-            this.getTimer() +
+            this.getTimer("Game starts in") +
         '</div>';
     }
 
@@ -84,17 +84,17 @@ class MenuPage {
         '</div>';
     }
 
-    getTimer(){
+    getTimer(text){
         return '' +
         '<div class="stats">' +
-            this.getTimerInner() +
+            this.getTimerInner(text) +
         '</div>';
     }
 
     getTimerInner(){
         return '' +
         '<div class="timer">' +
-            this.timer.toHTML() +
+            this.timer.toHTML("Game starts in") +
         '</div>' +
         this.playersReadyToHTML();;
     }

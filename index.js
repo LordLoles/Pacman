@@ -19,11 +19,11 @@ Array.prototype.shuffle = function() {
 
 
 var io = socket(server);
-var menuPage = new (require('./Server/MenuPage.js'))(preparationStarted, sendMenuPageToAll);
 var DBConnection = new (require('./Server/DBConnection.js'))();
+var menuPage;
 var Maps = require('./Server/Map.js');
 
-var connected = {};
+var connected = {}; // {socketID { socket: socket, logged: T/F, ready: T/F, playerID: DBID. playerName: DBname }}
 var map = new Maps.ClassicMap();
 
 let gameState;
@@ -31,33 +31,34 @@ let gameState;
 var sendGameStateID;
 var sendMenuPageToAllID;
 var sendPreparationPageToAllID;
+var sendgameStartingID;
+
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
-//menuStarted();
+menuStarted();
 
 // All the listenings
 io.on('connection', function(socket){
 	console.log("made socket connecton");
 	initPlayer();
-	menuStarted();
-	sendMenuPageToOne(connected[socket.id]);
+	sendMenuPageWholeToOne(connected[socket.id]);
 
 
 	function initPlayer(){
 		connected[socket.id] = {socket: socket, logged: false, ready: false};
 	}
 
-
+	/*
 	socket.on('id', function(event, ackCallback){
 		console.log('recieved id request');
 		//ackCallback(playerID);
-		//gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame, map);
-	});
+		gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame, map);
+	});*/
 
 	socket.on('change', function(event){
-		//console.log("command " + event.change + " from player " + socket.playerID);
-		var ingameID = inGameIDbyDBID(socket.playerID)
-		if (ingameID) gameState.move(ingameID, event.change);
+		var ingameID = inGameIDbyDBID(connected[socket.id].playerID);
+		//console.log("command " + event.change + " from player " + ingameID);
+		if (ingameID != undefined) gameState.move(ingameID, event.change);
 	});
 
 	socket.on('menu', function(){
@@ -129,18 +130,23 @@ function inGameIDbyDBID(dbID){
 }
 
 
-function sendGameStateToAll(tag, main, sec){
-	io.sockets.emit(tag, {
+
+function sendGameStateToAll(main, sec){
+	io.sockets.emit('change', {
 		world: main,
 		gameInfo: sec
 	});
 }
 
+function sendMenuPageWholeToOne(connection){
+	connection.socket.emit("menuWhole", {
+		main: menuPage.getMainMenu(connection.ready, connection.logged)
+	});
+}
+
 function sendMenuPageWhole(){
 	Object.values(connected).forEach(e => {
-		e.socket.emit("menuWhole", {
-			main: menuPage.getMainMenu(e.ready, e.logged)
-		});
+		sendMenuPageWholeToOne(e);
 	});
 }
 
@@ -176,32 +182,49 @@ function sendPreparationPageToAll(preparationPage){
 	});
 }
 
-
-function menuStarted(){
-	sendMenuPageWhole();
-	//sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
+function sendGameState(){
+	//console.log('sending changed state to all');
+	//if (gameState != undefined) 
+		sendGameStateToAll(gameState.worldToAjax(), gameState.gameInfoToAjax());
 }
 
 
+
+function menuStarted(){
+	//clearInterval(sendGameStateID);
+	Object.values(connected).forEach(e => {
+		e.ready = false;
+	});
+	clearInterval(sendGameStateID);
+	menuPage = new (require('./Server/MenuPage.js'))(preparationStarted, sendMenuPageToAll);
+	sendMenuPageWhole();
+	Object.values(connected).forEach(e => {
+		if (e.logged) sendMenuPageToOne(e);
+	});
+	//console.log("menu start");
+	//sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
+}
+
 function preparationStarted(){
 	clearInterval(sendMenuPageToAllID);
-	var preparationPage = new (require('./Server/PreparationPage.js'))(menuPage.playersReady, gameStarted);
+	map = new Maps.ClassicMap();
+	var preparationPage = new (require('./Server/PreparationPage.js'))(menuPage.playersReady, gameStarting);
 	mappedPlayersInGame = preparationPage.players;
 	sendPreparationPageToAllID = setInterval(sendPreparationPageToAll, 1000, preparationPage);
 }
 
-
-function gameStarted(){
+function gameStarting(){
+	clearInterval(sendPreparationPageToAllID);
+	gameState = new (require('./Server/GameState.js'))(mappedPlayersInGame, map, gameStarted);
 	sendGameStateID = setInterval(sendGameState, 50);
 }
 
-function gameFinished(){
-	clearInterval(sendGameStateID);
+function gameStarted(){
+	io.sockets.emit('gameStarted', null);
+	gameState.start(gameFinished);
 }
 
-
-function sendGameState(){
-	//console.log('sending changed state to all');
-	if (gameState != undefined) 
-		sendGameStateToAll('change', gameState.worldToAjax(), gameState.gameInfoToAjax());
+function gameFinished(){
+	gameState.end(menuStarted);
+	io.sockets.emit("gameFinished", null);
 }

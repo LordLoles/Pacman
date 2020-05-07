@@ -4,16 +4,18 @@ import savePreparationData from './Controller.js';
 
 class ServerConnection {
 
-    constructor(){
+    constructor(gameStart, gameFin){
         this.socket = io.connect("http://localhost:5000");
         //this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
         this.display = new Display();
+        this.gameStart = gameStart;
+        this.gameFin = gameFin;
 
         //console.log("listening");
         this.listenForMenu();
         this.listenForPreparation();
-        this.listenForChanges();
+        this.listenForGame();
     }
 
     sendChange(event){
@@ -30,11 +32,20 @@ class ServerConnection {
         this.send(tag, null);
     }
 
-    listenForChanges(){
+    listenForGame(){
         var display = this.display;
+        var gameStart = this.gameStart;
+        var gameFin = this.gameFin;
+
         this.socket.on('change', function(state){
             display.displayWorld(state.world);
             display.displayGameInfo(state.gameInfo);
+        });
+        this.socket.on('gameStarted', function(){
+            gameStart();
+        });
+        this.socket.on('gameFinished', function(){
+            gameFin();
         });
     }
 
@@ -49,7 +60,8 @@ class ServerConnection {
             display.displayGameInfo(state.info);
             logged = state.logged;
             ready = state.ready;
-            console.log("menuWhole");
+
+            //console.log("menu whole");
 
             socket.on("menu", function(state){
                 display.displayMenu(state.readyButton, undefined, state.timer);

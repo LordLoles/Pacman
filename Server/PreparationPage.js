@@ -3,7 +3,7 @@ var Timer = require('./Timer.js');
 class PreparationPage {
 
     constructor(playersReady, functionAfter){
-        this.timer = new Timer(5, functionAfter);
+        this.timer = new Timer(5, functionAfter, undefined, "Game starts in");
         this.players = this.mapPlayers(playersReady); // {ingameID { id: DBID, name: DBname}}
         this.noPlayers = Object.keys(this.players).length;
         //console.log("timer:", this.timer);
@@ -46,18 +46,18 @@ class PreparationPage {
     }
 
     getMainHTML(){
-        var ret = '<div class="preparation"> <div class="stats">Game starting</div> <div class="players">';
-        for(var i = 0; i < this.players; i++){
+        var ret = '<div class="preparation"> <div class="title">Game starting</div> <div class="players">';
+        for(var i = 0; i < Object.keys(this.players).length; i++){
             ret += this.getPlayerHTML(i);
         }
-        ret += '<div class"playerp"><div class"pacman"></div><p>' + this.players[0].name + '<br>starts as pacman!</p></div>';
-        ret += '</div></div>';
+        ret += '</div>';
+        ret += '<div class="playerp"><div class="pacman"></div><p>' + this.players[0].name + '</p><p>starts as pacman!</p></div>';
 
         return ret;
     }
 
-    getTimerHTML(){
-        return this.timer.toDivHTML();
+    getTimerHTML(text){
+        return this.timer.toDivHTML(text);
     }
 
 }

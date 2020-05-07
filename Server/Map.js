@@ -35,6 +35,10 @@ class AbstractMap {
         this.coinSpawner = new CoinSpawner(map, min, max);
     }
 
+    startSpawningCoins(){
+        this.coinSpawner.startSpawning();
+    }
+
     find(code){
         for(var i = 0; i < this.width; i++){
             for(var j = 0; j < this.height; j++){

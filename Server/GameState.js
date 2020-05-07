@@ -1,19 +1,23 @@
-
 var Player = require('./Player.js');
+var Timer = require('./Timer.js');
 var WorldProcessing = require('./WorldProcessing.js');
 var GameLogic = require('./GameLogic.js');
 const performance = require('perf_hooks').performance;
 
 
 class GameState {
-
     
-    constructor(mapped, map) {
+    constructor(mapped, map, gameStarted) {
         this.map = map;
+        this.mapped = mapped;
         this.gameLogic = new GameLogic(this.map);
+        this.started = false;
         this.pacman; //id of player
+        this.gameTime = 30; // in seconds;
+
         this.ghostSpeed = 290;
         this.pacmanSpeed = 190;
+
         var noPlayers = Object.keys(mapped).length;
 
         this.players = new Array (noPlayers);
@@ -26,11 +30,29 @@ class GameState {
             }
         }
 
-
         this.setPacman(0);
+
+        this.timer = new Timer(3, gameStarted, undefined, "Get ready");
+        this.timer.start();
+    }
+
+    start(gameEnded){
+        this.timer.stop();
+        this.started = true;
+        this.map.startSpawningCoins();
+        this.timer = new Timer(this.gameTime, gameEnded);
+        this.timer.start();
+    }
+
+    end(menuStarted){
+        this.timer.stop();
+        this.started = false;
+        this.timer = new Timer(5, menuStarted, undefined, "Game finished");
+        this.timer.start();
     }
 
     move(playerID, direction){
+        if (!this.started) return;
         let player = this.players[playerID];
         let newX = player.x;
         let newY = player.y;
@@ -110,6 +132,10 @@ class GameState {
         var player = this.players[playerID]
         player.moveSpeed = this.ghostSpeed;
         player.lastMove = performance.now() + 1000;
+    }
+
+    ingameIDtoName(id){
+        return this.mapped[id].name;
     }
 
     worldToAjax(){
