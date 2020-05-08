@@ -31,18 +31,17 @@ let gameState;
 var sendGameStateID;
 var sendMenuPageToAllID;
 var sendPreparationPageToAllID;
-var sendgameStartingID;
 
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
+
 
 menuStarted();
 
 // All the listenings
-io.on('connection', function(socket){
+io.on('connection', async function(socket){
 	console.log("made socket connecton");
 	initPlayer();
 	sendMenuPageWholeToOne(connected[socket.id]);
-
 
 	function initPlayer(){
 		connected[socket.id] = {socket: socket, logged: false, ready: false};
@@ -81,10 +80,9 @@ io.on('connection', function(socket){
 		sendMenuPageToAll();
 	});
 
-	socket.on('login', function(state){
+	socket.on('login', async function(state){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		initPlayer();
-		console.log("login", state);
 		var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
 		if (format.test(state.name) || format.test(state.pass)) {
 			socket.emit("err", {
@@ -92,12 +90,16 @@ io.on('connection', function(socket){
 			});
 		}
 		else {
-			connected[socket.id].playerID = DBConnection.getPlayerID(state.name, state.pass);
+			connected[socket.id].playerID = await DBConnection.getPlayerID(state.name, state.pass);
 			if (connected[socket.id].playerID == undefined) {
 				socket.emit("err", {
 					text: "incorrect name or password!"
 				});
 			} else {
+				console.log("login", state);
+				socket.emit("err", {
+					text: "Logged in!"
+				});
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
 				sendMenuPageToAll();
@@ -105,7 +107,7 @@ io.on('connection', function(socket){
 		}
 	});
 
-	socket.on('reg', function(state){
+	socket.on('reg', async function(state){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		initPlayer();
         console.log('reg');
@@ -114,7 +116,7 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function () {
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
-		initPlayer();
+		delete connected[socket.id];
         console.log('user disconnected');
 	});
 	

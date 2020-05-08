@@ -81,6 +81,7 @@ class MenuPage {
             '<input type="password" id="lpass" name="lpass" value="123"><br><br>' +
             '<button id="loginbtn" type="button">Log In</button><br>' +
             '<button id="regbtn" type="button">Register</button>' +
+            '<p class ="err"></p>' +
         '</div>';
     }
 

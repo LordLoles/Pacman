@@ -1,15 +1,69 @@
+const { Client } = require('pg');
+
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
+//heroku
+const client = new Client({
+    host: "ec2-34-195-169-25.compute-1.amazonaws.com",
+    user: "oimduyhitdlkdi",
+    password: "0155ad836fb0d73746614b38e4bf5c26f1106c257a9285ba0ef591106fa2bc54",
+    database: "d9ahtk4ls6n4je",
+    ssl: true
+});
+
+//local
+/*
+host: localhost,
+database: Pacman,
+*/
+
+//client.connection.ssl = false;
+
+console.log("Connecting to DB");
+// postgres://oimduyhitdlkdi:0155ad836fb0d73746614b38e4bf5c26f1106c257a9285ba0ef591106fa2bc54@ec2-34-195-169-25.compute-1.amazonaws.com:5432/d9ahtk4ls6n4je
+
+client.connect()
+.then(() => console.log("DB connected successfuly"))
+.catch((e) => console.log("DB error\n", e));
+
+
 class DBConnection {
     
     constructor(){
-
+        //this.createNewDB();
+        //this.query("Drop TABLE Players");
     }
 
     getPlayerID(name, password){
-        var playerID;
+        return this.query('SELECT p."ID" FROM public."Players" AS p WHERE p."Name"=\'' + name + '\' AND p."Password"=\'' + password + '\';')
+        .then(function(a) {if (a.err) throw a.err; else return a.res;})
+        //.then(function(res) {console.log(res); res.length ? console.log("true") : console.log("false"); return res;})
+        .then((res) => res.length ? res[0].ID : undefined)
+    }
 
-        playerID = Math.floor(Math.random() * 99);
+    regPlayer(name, password){
         
-        return playerID;
+    }
+
+
+    async query(text){
+        try{
+            var err;
+            var res;
+            await client.query("BEGIN");
+            await client.query(text, (e, r)=> {
+                err = e;
+                res = r.rows;
+            });
+            await client.query("COMMIT");
+            return {err: err, res: res};
+        }
+        catch(e){
+            console.log("DB error\n", e);
+            await client.query("ROLLBACK");
+        }
+        finally{
+        }
     }
 
 }

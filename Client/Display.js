@@ -16,6 +16,20 @@ class Display {
         if (timer) document.getElementsByClassName("stats")[0].innerHTML = timer;
     }
 
+    displayError(text){
+        document.getElementsByClassName("err")[0].innerHTML = text;
+        /*
+        var errDiv = document.getElementsByClassName("err")[0];
+        if (text) 
+        {
+            errDiv.innerHTML = text;
+            errDiv.style.color = "red";
+        } else {
+            errDiv.innerHTML = "no error!";
+            errDiv.style.color = "black";
+        }*/
+    }
+
     display(text, id){
         document.getElementById(id).innerHTML = text;
     }

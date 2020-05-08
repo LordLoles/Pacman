@@ -16,6 +16,7 @@ class ServerConnection {
         this.listenForMenu();
         this.listenForPreparation();
         this.listenForGame();
+        this.listenForErrors();
     }
 
     sendChange(event){
@@ -58,6 +59,7 @@ class ServerConnection {
         this.socket.on('menuWhole', function(state){
             display.displayWorld(state.main);
             display.displayGameInfo(state.info);
+            display.displayError("");
             logged = state.logged;
             ready = state.ready;
 
@@ -68,6 +70,7 @@ class ServerConnection {
 
                 document.getElementById("readybtn").addEventListener("click", function(){
                     console.log("ready");
+                    display.displayError("");
                     socket.emit("ready", null);
                 });
 
@@ -75,6 +78,7 @@ class ServerConnection {
 
             document.getElementById("loginbtn").addEventListener("click", function(){
                 console.log("login");
+                display.displayError("");
                 socket.emit("login", {
                     name: document.getElementById("lname").value,
                     pass: document.getElementById("lpass").value
@@ -83,6 +87,7 @@ class ServerConnection {
 
             document.getElementById("regbtn").addEventListener("click", function(){
                 console.log("reg");
+                display.displayError("");
                 socket.emit("reg", {
                     name: document.getElementById("lname").value,
                     pass: document.getElementById("lpass").value
@@ -99,6 +104,15 @@ class ServerConnection {
             savePreparationData(state.id, state.width, state.height);
             display.displayWorld(state.main);
             display.displayGameInfo(state.timer);
+        });
+    }
+
+    listenForErrors(){
+        var display = this.display;
+
+        this.socket.on('err', function(state){
+            console.log("error");
+            display.displayError(state.text);
         });
     }
 
