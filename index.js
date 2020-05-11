@@ -102,7 +102,7 @@ io.on('connection', async function(socket){
 				});
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
-				sendMenuPageToAll();
+				sendMenuPageToOne(connected[socket.id]);
 			}
 		}
 	});
@@ -110,7 +110,28 @@ io.on('connection', async function(socket){
 	socket.on('reg', async function(state){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		initPlayer();
-        console.log('reg');
+		
+		var inDB = await DBConnection.findName(state.name);
+
+		if (inDB){
+			socket.emit("err", {
+				text: "Given name is already taken!"
+			});
+		} else {
+			await DBConnection.regPlayer(state.name, state.pass);
+			console.log('reg', state.name);
+			socket.emit("err", {
+				text: "Registred successfully!"
+			});
+			sendMenuPageToOne(connected[socket.id]);
+		}
+
+	});
+
+	socket.on('logout', function(){
+		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		initPlayer();
+		console.log('logout');
 		sendMenuPageWhole();
 	});
 
@@ -228,5 +249,6 @@ function gameStarted(){
 
 function gameFinished(){
 	gameState.end(menuStarted);
+	DBConnection.insertGame(mappedPlayersInGame);
 	io.sockets.emit("gameFinished", null);
 }

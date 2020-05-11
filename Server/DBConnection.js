@@ -30,21 +30,48 @@ client.connect()
 class DBConnection {
     
     constructor(){
-        //this.createNewDB();
-        //this.query("Drop TABLE Players");
+        //this.deletePlayer('quest', '123')
     }
 
     getPlayerID(name, password){
-        return this.query('SELECT p."ID" FROM public."Players" AS p WHERE p."Name"=\'' + name + '\' AND p."Password"=\'' + password + '\';')
+        return this.queryRes('SELECT p."ID" FROM public."Players" AS p WHERE p."Name"=\'' + name + '\' AND p."Password"=\'' + password + '\';')
         .then(function(a) {if (a.err) throw a.err; else return a.res;})
         //.then(function(res) {console.log(res); res.length ? console.log("true") : console.log("false"); return res;})
         .then((res) => res.length ? res[0].ID : undefined)
     }
 
+    findName(name){
+        return this.queryRes('SELECT p."ID" FROM public."Players" AS p WHERE p."Name"=\'' + name + '\';')
+        .then(function(a) {if (a.err) throw a.err; else return a.res;})
+        .then((res) => res.length ? res[0].ID : undefined)
+    }
+
     regPlayer(name, password){
+        return this.query('INSERT INTO public."Players" ("Name", "Password") VALUES (\'' + name + '\', \'' + password + '\');')
+        .then(function(a) {if (a.err) throw a.err; else return a.rows;});
+    }
+
+    deletePlayer(name, password){
+        return this.queryRes('DELETE FROM public."Players" AS p WHERE p."Name"=\'' + name + '\' AND p."Password"=\'' + password + '\';');
+    }
+
+    insertGame(mappedPlayersInGame){
+
+    }
+
+    insertResult(player){
+
+    }
+
+    makeJoin(gameID, playerID){
         
     }
 
+
+    async queryRes(text){
+        var a = await this.query(text);
+        return {err: a.err, res: a.res.rows};
+    }
 
     async query(text){
         try{
@@ -53,7 +80,7 @@ class DBConnection {
             await client.query("BEGIN");
             await client.query(text, (e, r)=> {
                 err = e;
-                res = r.rows;
+                res = r;
             });
             await client.query("COMMIT");
             return {err: err, res: res};

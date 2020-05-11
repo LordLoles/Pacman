@@ -40,7 +40,7 @@ class GameState {
         this.timer.stop();
         this.started = true;
         this.map.startSpawningCoins();
-        this.timer = new Timer(this.gameTime, gameEnded);
+        this.timer = new Timer(this.gameTime, gameEnded, (() => this.players[this.pacman].timePacman++));
         this.timer.start();
     }
 

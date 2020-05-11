@@ -111,7 +111,7 @@ class ServerConnection {
         var display = this.display;
 
         this.socket.on('err', function(state){
-            console.log("error");
+            console.log("error", state.text);
             display.displayError(state.text);
         });
     }
