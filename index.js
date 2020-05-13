@@ -249,6 +249,7 @@ function gameStarted(){
 
 function gameFinished(){
 	gameState.end(menuStarted);
-	DBConnection.insertGame(mappedPlayersInGame);
+	DBConnection.insertGameData(mappedPlayersInGame, gameState.players);
+	DBConnection.queryRes('SELECT * FROM public."Games";').then((a) => console.log("last game", a.res[a.res.length-1]));
 	io.sockets.emit("gameFinished", null);
 }

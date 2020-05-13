@@ -30,7 +30,7 @@ client.connect()
 class DBConnection {
     
     constructor(){
-        //this.deletePlayer('quest', '123')
+        //this.queryRes('SELECT * FROM public."Games";').then((a) => console.log("last game", a.res[a.res.length-1]));
     }
 
     getPlayerID(name, password){
@@ -55,16 +55,50 @@ class DBConnection {
         return this.queryRes('DELETE FROM public."Players" AS p WHERE p."Name"=\'' + name + '\' AND p."Password"=\'' + password + '\';');
     }
 
-    insertGame(mappedPlayersInGame){
+    async insertGameData(mappedPlayersInGame, players){
+        var gameID = await this.insertGame();
+        var resIDs = new Array(players.length);
 
-    }
-
-    insertResult(player){
-
-    }
-
-    makeJoin(gameID, playerID){
+        for(var i = 0; i < players.length; i++){
+            var dbID = mappedPlayersInGame[players[i].id].id;
+            resIDs[i] = await this.insertResult(gameID, dbID, players[i]);
+            this.makeJoin(gameID, dbID);
+        }
         
+        for(var i = 0; i < players.length; i++){
+            var dbID = mappedPlayersInGame[players[i].id].id;
+            this.updateGame(gameID, resIDs);
+        }
+    }
+
+    // Also returns id of game, that was created in DB
+    insertGame(){
+        return this.queryRes('INSERT INTO public."Games" DEFAULT VALUES RETURNING "ID";')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0].ID;});
+    }
+
+    updateGame(gameID, resIDs){
+        var query = 'UPDATE public."Games" SET';
+
+        for(var i = 0; i < resIDs.length; i++){
+            if (i != 0) query += ',';
+            query += ' "IDRes' + i + '"=' + resIDs[i];
+        }
+
+        query += ' WHERE "ID"=' + gameID;
+        return this.query(query)
+        .then(function(a) {if (a.err) throw a.err; else return a;});
+    }
+
+    // Also returns id of result, that was created in DB
+    async insertResult(gameID, playerDBID, player){
+        return this.queryRes('INSERT INTO public."Results" ("IDPlayer", "IDGame", "Points", "Time") VALUES (' + playerDBID + ', ' + gameID + ', ' + player.points + ', ' + player.timePacman + ') RETURNING "ID";')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0].ID;});
+    }
+
+    makeJoin(gameID, playerDBID){
+        return this.query('INSERT INTO public."Join" VALUES (' + playerDBID + ', ' + gameID + ');')
+        .then(function(a) {if (a.err) throw a.err; else return a;});
     }
 
 
