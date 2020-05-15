@@ -58,7 +58,6 @@ class ServerConnection {
 
         this.socket.on('menuWhole', function(state){
             display.displayWorld(state.main);
-            display.displayGameInfo(state.info);
             display.displayError("");
             logged = state.logged;
             ready = state.ready;

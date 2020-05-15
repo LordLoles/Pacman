@@ -22,6 +22,7 @@ var io = socket(server);
 var DBConnection = new (require('./Server/DBConnection.js'))();
 var menuPage;
 var Maps = require('./Server/Map.js');
+var menuStats = new (require('./Server/MenuStats.js'))(DBConnection);
 
 var connected = {}; // {socketID { socket: socket, logged: T/F, ready: T/F, playerID: DBID. playerName: DBname }}
 var map = new Maps.ClassicMap();
@@ -39,12 +40,13 @@ menuStarted();
 
 // All the listenings
 io.on('connection', async function(socket){
-	console.log("made socket connecton");
 	initPlayer();
+	console.log("made socket connection from", connected[socket.id].address);
+
 	sendMenuPageWholeToOne(connected[socket.id]);
 
 	function initPlayer(){
-		connected[socket.id] = {socket: socket, logged: false, ready: false};
+		connected[socket.id] = {socket: socket, logged: false, ready: false, address : socket.handshake.address};
 	}
 
 	/*
@@ -102,13 +104,15 @@ io.on('connection', async function(socket){
 				});
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
-				sendMenuPageToOne(connected[socket.id]);
+				sendMenuPagePlayerStats(connected[socket.id]);
 			}
 		}
+		sendMenuPageToOne(connected[socket.id]);
 	});
 
 	socket.on('reg', async function(state){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		sendMenuPagePlayerStatsClear(connected[socket.id]);
 		initPlayer();
 		
 		var inDB = await DBConnection.findName(state.name);
@@ -123,13 +127,13 @@ io.on('connection', async function(socket){
 			socket.emit("err", {
 				text: "Registred successfully!"
 			});
-			sendMenuPageToOne(connected[socket.id]);
 		}
-
+		sendMenuPageToOne(connected[socket.id]);
 	});
 
 	socket.on('logout', function(){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		sendMenuPagePlayerStatsClear(connected[socket.id]);
 		initPlayer();
 		console.log('logout');
 		sendMenuPageWhole();
@@ -185,6 +189,17 @@ function sendMenuPageToAll(){
 	Object.values(connected).forEach(e => {
 		sendMenuPageToOne(e);
 	});
+}
+
+async function sendMenuPagePlayerStats(connection){
+	connection.socket.emit("menuStats", {
+		upper: await menuStats.getPlayerStatsHTML(connection.playerID, connection.playerID),
+		lower: '<div id="gameMenuStats"></div>'
+	});
+}
+
+function sendMenuPagePlayerStatsClear(connection){
+	connection.socket.emit("menuStatsClear", null);
 }
 
 function sendPreparationPageToAll(preparationPage){

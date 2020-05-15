@@ -101,6 +101,30 @@ class DBConnection {
         .then(function(a) {if (a.err) throw a.err; else return a;});
     }
 
+    gameByID(gameID){
+        return this.queryRes('SELECT "ID", TO_CHAR("Date", \'Mon dd, yyyy, HH24:MI:SS\') AS "Date","IDRes0", "IDRes1", "IDRes2", "IDRes3", "IDRes4" FROM public."Games" WHERE "ID"=' + gameID + ';')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0];});
+    }
+
+    gamesIDsByPlayerID(playerID){
+        return this.queryRes('SELECT "IDGame" FROM public."Join" WHERE "IDPlayer"=' + playerID + ' ORDER BY "IDGame" DESC;')
+        .then(function(a) {if (a.err) throw a.err; else return a.res;});
+    }
+
+    playersAveragePointsInMatches(playerID){
+        return this.queryRes('SELECT TO_CHAR(AVG (r."Points"), \'FM999999999.00\') AS "avg" FROM public."Join" AS "j", public."Games" AS "g", public."Results" AS "r" WHERE j."IDPlayer"=' + playerID + 'AND j."IDGame"=g."ID" AND j."IDPlayer"=r."IDPlayer" AND g."ID"=r."IDGame";')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0].avg;});
+    }
+
+    playersAverageTimeInMatches(playerID){
+        return this.queryRes('SELECT TO_CHAR(AVG (r."Time"), \'FM999999999.00\') AS "avg" FROM public."Join" AS "j", public."Games" AS "g", public."Results" AS "r" WHERE j."IDPlayer"=' + playerID + 'AND j."IDGame"=g."ID" AND j."IDPlayer"=r."IDPlayer" AND g."ID"=r."IDGame";')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0].avg;});
+    }
+
+    gameResultByID(resID){
+        return this.queryRes('SELECT * FROM public."Results" WHERE "ID"=\'' + resID + '\';')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0];})
+    }
 
     async queryRes(text){
         var a = await this.query(text);

@@ -58,7 +58,7 @@ function drawPlayer(gameState, id) {
 
 function drawGameInfo(gameState) {
     var players = Array.from(gameState.players);
-    players.sort((a, b) => b.points - a.points);
+    players.sort((a, b) => {var p = b.Points - a.Points; if (p) return p; else return (b.timePacman - a.timePacman);});
 
     var gameInfo = "";
 
