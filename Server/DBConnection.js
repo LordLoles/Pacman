@@ -46,6 +46,11 @@ class DBConnection {
         .then((res) => res.length ? res[0].ID : undefined)
     }
 
+    findPlayerByID(playerID){
+        return this.queryRes('SELECT * FROM public."Players" WHERE "ID"=\'' + playerID + '\';')
+        .then(function(a) {if (a.err) throw a.err; else return a.res[0];})
+    }
+
     regPlayer(name, password){
         return this.query('INSERT INTO public."Players" ("Name", "Password") VALUES (\'' + name + '\', \'' + password + '\');')
         .then(function(a) {if (a.err) throw a.err; else return a.rows;});

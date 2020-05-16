@@ -33,6 +33,12 @@ class ServerConnection {
         this.send(tag, null);
     }
 
+    clickedGame(id){
+        this.socket.emit(gameStats, {
+            ID: id
+        });
+    }
+
     listenForGame(){
         var display = this.display;
         var gameStart = this.gameStart;
@@ -59,6 +65,7 @@ class ServerConnection {
         this.socket.on('menuWhole', function(state){
             display.displayWorld(state.main);
             display.displayError("");
+            display.displayGameInfo('<div id="menuStatsPlayer"></div><div id="menuStatsGame"></div>');
             logged = state.logged;
             ready = state.ready;
 
@@ -91,6 +98,25 @@ class ServerConnection {
                     name: document.getElementById("lname").value,
                     pass: document.getElementById("lpass").value
                 });
+            });
+            
+            socket.on("menuStats", function(state){
+                display.displayMenuStats(state.upper, state.lower);
+
+                document.getElementById("logoutbtn").addEventListener("click", function(){
+                    socket.emit("logout", null);
+                });
+
+                document.getElementById("loggedPlayerName").addEventListener("click", function() {
+                    socket.emit("myStatsRequired", null);
+                });
+
+                Array.from(document.getElementsByClassName("recentGameStat")).forEach(e => {
+                    e.addEventListener("click", function() {
+                        socket.emit("showGameStats", e.id);
+                    });
+                });
+
             });
 
         });

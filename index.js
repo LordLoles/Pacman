@@ -99,11 +99,9 @@ io.on('connection', async function(socket){
 				});
 			} else {
 				console.log("login", state);
-				socket.emit("err", {
-					text: "Logged in!"
-				});
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
+				sendMenuPagePlayerStatsOnlyLogged(connected[socket.id]);
 				sendMenuPagePlayerStats(connected[socket.id]);
 			}
 		}
@@ -139,12 +137,20 @@ io.on('connection', async function(socket){
 		sendMenuPageWhole();
 	});
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function() {
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		delete connected[socket.id];
         console.log('user disconnected');
 	});
 	
+	socket.on('showGameStats', async function(id) {
+		sendMenuPageGameStats(id);
+	});
+	
+	socket.on('myStatsRequired', function() {
+		sendMenuPagePlayerStats(connected[socket.id]);
+	});
+
 });
 
 
@@ -192,14 +198,34 @@ function sendMenuPageToAll(){
 }
 
 async function sendMenuPagePlayerStats(connection){
+	var res = await menuStats.getPlayerStatsHTML(connection.playerID, connection.playerID);
+	if (connection.logged)
 	connection.socket.emit("menuStats", {
-		upper: await menuStats.getPlayerStatsHTML(connection.playerID, connection.playerID),
-		lower: '<div id="gameMenuStats"></div>'
+		upper: res,
+		lower: undefined
+	});
+}
+
+async function sendMenuPagePlayerStatsOnlyLogged(connection){
+	var res = await menuStats.getPlayerStatsOnlyLoggedHTML(connection.playerID);
+	if (connection.logged)
+	connection.socket.emit("menuStats", {
+		upper: res,
+		lower: undefined
 	});
 }
 
 function sendMenuPagePlayerStatsClear(connection){
 	connection.socket.emit("menuStatsClear", null);
+}
+
+async function sendMenuPageGameStats(gameID){
+	var res = await menuStats.getGameStatsByID(gameID);
+	if (connection.logged)
+	connection.socket.emit("menuStats", {
+		upper: undefined,
+		lower: res
+	});
 }
 
 function sendPreparationPageToAll(preparationPage){
