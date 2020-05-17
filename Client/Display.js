@@ -10,9 +10,15 @@ class Display {
         this.display(text, "gameInfo");
     }
 
-    displayMenuStats(upper, lower){
-        if (upper) document.getElementById("menuStatsPlayer").innerHTML = upper;
-        if (lower) document.getElementById("menuStatsGame").innerHTML = lower;
+    displayMenuStats(upper, lower, clear=false){
+        var upperHtML = document.getElementById("menuStatsPlayer");
+        var lowerHTML = document.getElementById("menuStatsGame");
+        if (clear) {
+            if (upperHtML) upperHtML.innerHTML = "";
+            if (lowerHTML) lowerHTML.innerHTML = "";
+        }
+        if (upper && upperHtML) upperHtML.innerHTML = upper;
+        if (lower && lowerHTML) lowerHTML.innerHTML = lower;
     }
 
     displayMenu(readyButton, login, timer){

@@ -4,13 +4,15 @@ import savePreparationData from './Controller.js';
 
 class ServerConnection {
 
-    constructor(gameStart, gameFin){
+    constructor(gameStart, gameFin, changeMapsCSS){
         this.socket = io.connect("http://localhost:5000");
         //this.socket = io.connect("https://mutliplayer-pacman.herokuapp.com/");
         this.id;
         this.display = new Display();
+        this.changeMapsCSS = changeMapsCSS;
         this.gameStart = gameStart;
         this.gameFin = gameFin;
+        this.gameFin();
 
         //console.log("listening");
         this.listenForMenu();
@@ -43,10 +45,12 @@ class ServerConnection {
         var display = this.display;
         var gameStart = this.gameStart;
         var gameFin = this.gameFin;
+        var changeMapsCSS = this.changeMapsCSS;
 
         this.socket.on('change', function(state){
             display.displayWorld(state.world);
             display.displayGameInfo(state.gameInfo);
+            //changeMapsCSS();
         });
         this.socket.on('gameStarted', function(){
             gameStart();
@@ -80,6 +84,12 @@ class ServerConnection {
                     socket.emit("ready", null);
                 });
 
+                Array.from(document.getElementsByClassName("playersReady")).forEach(e => {
+                    e.addEventListener("click", function() {
+                        socket.emit("playerStatsRequired", e.id);
+                    });
+                });
+
             });
 
             document.getElementById("loginbtn").addEventListener("click", function(){
@@ -102,21 +112,35 @@ class ServerConnection {
             
             socket.on("menuStats", function(state){
                 display.displayMenuStats(state.upper, state.lower);
+                if (!document.getElementById("logoutbtn")) return;
 
-                document.getElementById("logoutbtn").addEventListener("click", function(){
-                    socket.emit("logout", null);
-                });
-
-                document.getElementById("loggedPlayerName").addEventListener("click", function() {
-                    socket.emit("myStatsRequired", null);
-                });
-
-                Array.from(document.getElementsByClassName("recentGameStat")).forEach(e => {
-                    e.addEventListener("click", function() {
-                        socket.emit("showGameStats", e.id);
+                if (state.upper) {
+                    document.getElementById("logoutbtn").addEventListener("click", function(){
+                        socket.emit("logout", null);
                     });
-                });
+                    document.getElementById("loggedPlayerName").addEventListener("click", function() {
+                        socket.emit("myStatsRequired", null);
+                    });
 
+                    Array.from(document.getElementsByClassName("recentGameStat")).forEach(e => {
+                        e.addEventListener("click", function() {
+                            socket.emit("showGameStats", e.id);
+                        });
+                    });
+                }
+
+                if (state.lower) {
+                    Array.from(document.getElementsByClassName("playerOfGameStats")).forEach(e => {
+                        e.addEventListener("click", function() {
+                            socket.emit("playerStatsRequired", e.id);
+                        });
+                    });
+                }
+
+            });
+            
+            socket.on("menuStatsClear", function(){
+                display.displayMenuStats(undefined, undefined, true);
             });
 
         });

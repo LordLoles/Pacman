@@ -17,7 +17,7 @@ class MenuPage {
 
         var playersReadyLength = this.playersReadyLength();
         if (playersReadyLength >= 2 && playersReadyLength < 5){
-            this.newTimerStart(2);
+            this.newTimerStart(10);
         } else if (playersReadyLength == 5) {
             this.newTimerStart(3);
         } else {
@@ -108,8 +108,10 @@ class MenuPage {
 
     playersReadyToHTML(){
         var ret = "<p> Players Ready:</p>";
-        Object.values(this.playersReady).forEach(element => {
-            ret += "<p>" + element + "</p>";
+        //console.log("pready", this.playersReady, Object.keys(this.playersReady));
+        Object.keys(this.playersReady).forEach(key => {
+            var element = this.playersReady[key];
+            ret += '<p id="' + key + '" class="playersReady"><span class="yHover">' + element + '</span</p>';
         });
         return ret;
     }

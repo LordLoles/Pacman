@@ -32,6 +32,7 @@ let gameState;
 var sendGameStateID;
 var sendMenuPageToAllID;
 var sendPreparationPageToAllID;
+var gameRunning = false;
 
 var mappedPlayersInGame; // {ingameID { id: DBID, name: DBname}}
 
@@ -46,7 +47,7 @@ io.on('connection', async function(socket){
 	sendMenuPageWholeToOne(connected[socket.id]);
 
 	function initPlayer(){
-		connected[socket.id] = {socket: socket, logged: false, ready: false, address : socket.handshake.address};
+		connected[socket.id] = {socket: socket, logged: false, ready: false, address: socket.handshake.address};
 	}
 
 	/*
@@ -57,6 +58,7 @@ io.on('connection', async function(socket){
 	});*/
 
 	socket.on('change', function(event){
+		if (!gameRunning) return;
 		var ingameID = inGameIDbyDBID(connected[socket.id].playerID);
 		//console.log("command " + event.change + " from player " + ingameID);
 		if (ingameID != undefined) gameState.move(ingameID, event.change);
@@ -83,7 +85,14 @@ io.on('connection', async function(socket){
 	});
 
 	socket.on('login', async function(state){
+		if (playerAlreadyLoggedIn(state.name)){
+			socket.emit("err", {
+				text: "This player is already logged in!"
+			});
+			return;
+		}
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
+		sendMenuPagePlayerStatsClear(connected[socket.id]);
 		initPlayer();
 		var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
 		if (format.test(state.name) || format.test(state.pass)) {
@@ -97,12 +106,12 @@ io.on('connection', async function(socket){
 				socket.emit("err", {
 					text: "incorrect name or password!"
 				});
-			} else {
-				console.log("login", state);
+			}else {
+				console.log("login", state.name);
 				connected[socket.id].logged = true;
 				connected[socket.id].playerName = state.name;
 				sendMenuPagePlayerStatsOnlyLogged(connected[socket.id]);
-				sendMenuPagePlayerStats(connected[socket.id]);
+				sendMenuPagePlayerStats(connected[socket.id], connected[socket.id].playerID);
 			}
 		}
 		sendMenuPageToOne(connected[socket.id]);
@@ -132,23 +141,29 @@ io.on('connection', async function(socket){
 	socket.on('logout', function(){
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		sendMenuPagePlayerStatsClear(connected[socket.id]);
+		console.log('logout', connected[socket.id].playerName);
 		initPlayer();
-		console.log('logout');
 		sendMenuPageWhole();
 	});
 
     socket.on('disconnect', function() {
+		var wasReady = connected[socket.id].ready;
 		menuPage.removeReadyPlayer(connected[socket.id].playerID);
 		delete connected[socket.id];
-        console.log('user disconnected');
+		console.log('user disconnected');
+		if (wasReady) sendMenuPageToAll();
 	});
 	
 	socket.on('showGameStats', async function(id) {
-		sendMenuPageGameStats(id);
+		sendMenuPageGameStats(connected[socket.id], id);
 	});
 	
 	socket.on('myStatsRequired', function() {
-		sendMenuPagePlayerStats(connected[socket.id]);
+		sendMenuPagePlayerStats(connected[socket.id], connected[socket.id].playerID);
+	});
+	
+	socket.on('playerStatsRequired', function(id) {
+		sendMenuPagePlayerStats(connected[socket.id], id);
 	});
 
 });
@@ -156,10 +171,23 @@ io.on('connection', async function(socket){
 
 
 function inGameIDbyDBID(dbID){
-	for (var i = 0; i < Object.keys(mappedPlayersInGame).length; i++){
+	for (var i = 0; i < (Object.keys(mappedPlayersInGame)).length; i++){
 		if (mappedPlayersInGame[i]["id"] == dbID) return i;
 	}
 	return undefined;
+}
+
+function playerAlreadyLoggedIn(playerName){
+	var found = false;
+	Object.values(connected).forEach(e => {
+		if (e.logged && e.playerName == playerName)	found = true;
+		if (found) return;
+	});
+	return found;
+}
+
+function isLogged(socketID){
+	return connected[socketID].logged;
 }
 
 
@@ -197,35 +225,35 @@ function sendMenuPageToAll(){
 	});
 }
 
-async function sendMenuPagePlayerStats(connection){
-	var res = await menuStats.getPlayerStatsHTML(connection.playerID, connection.playerID);
-	if (connection.logged)
-	connection.socket.emit("menuStats", {
-		upper: res,
-		lower: undefined
-	});
+async function sendMenuPagePlayerStats(connection, playerID){
+	var res = await menuStats.getPlayerStatsHTML(connection.playerID, playerID);
+	if (isLogged(connection.socket.id))
+		connection.socket.emit("menuStats", {
+			upper: res,
+			lower: undefined
+		});
 }
 
 async function sendMenuPagePlayerStatsOnlyLogged(connection){
 	var res = await menuStats.getPlayerStatsOnlyLoggedHTML(connection.playerID);
-	if (connection.logged)
-	connection.socket.emit("menuStats", {
-		upper: res,
-		lower: undefined
-	});
+	if (isLogged(connection.socket.id))
+		connection.socket.emit("menuStats", {
+			upper: res,
+			lower: undefined
+		});
 }
 
 function sendMenuPagePlayerStatsClear(connection){
 	connection.socket.emit("menuStatsClear", null);
 }
 
-async function sendMenuPageGameStats(gameID){
+async function sendMenuPageGameStats(connection, gameID){
 	var res = await menuStats.getGameStatsByID(gameID);
-	if (connection.logged)
-	connection.socket.emit("menuStats", {
-		upper: undefined,
-		lower: res
-	});
+	if (isLogged(connection.socket.id))
+		connection.socket.emit("menuStats", {
+			upper: undefined,
+			lower: res
+		});
 }
 
 function sendPreparationPageToAll(preparationPage){
@@ -263,7 +291,10 @@ function menuStarted(){
 	menuPage = new (require('./Server/MenuPage.js'))(preparationStarted, sendMenuPageToAll);
 	sendMenuPageWhole();
 	Object.values(connected).forEach(e => {
-		if (e.logged) sendMenuPageToOne(e);
+		if (e.logged) {
+			sendMenuPageToOne(e);
+			sendMenuPagePlayerStatsOnlyLogged(e);
+		}
 	});
 	//console.log("menu start");
 	//sendMenuPageToAllID = setInterval(sendMenuPageToAll, 1000);
@@ -285,12 +316,14 @@ function gameStarting(){
 
 function gameStarted(){
 	io.sockets.emit('gameStarted', null);
+	gameRunning = true;
 	gameState.start(gameFinished);
 }
 
 function gameFinished(){
+	io.sockets.emit("gameFinished", null);
+	gameRunning = false;
 	gameState.end(menuStarted);
 	DBConnection.insertGameData(mappedPlayersInGame, gameState.players);
 	DBConnection.queryRes('SELECT * FROM public."Games";').then((a) => console.log("last game", a.res[a.res.length-1]));
-	io.sockets.emit("gameFinished", null);
 }

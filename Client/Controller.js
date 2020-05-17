@@ -1,9 +1,10 @@
 import ServerConnection from './ServerConnection.js';
 
-var serverConnection = new ServerConnection(gameStarted, gameFinished);
+var serverConnection = new ServerConnection(gameStarted, gameFinished, changeMapsCSS);
 var id;
 var mapWidth;
 var mapHeight;
+var gameRunning = false;
 
 /*
 function menu(){
@@ -19,18 +20,26 @@ function savePreparationData(idP, widthP, heightP){
     mapHeight = heightP;
 }
 
+//funkcia sa nikdy nepouziva
 function changeMapsCSS(){
-    console.log((document.getElementsByClassName("timer"))[0]);
-    console.log("readybtn");
-    document.getElementsByClassName("timer")[0].style.color = "green";
-    console.log((document.getElementsByClassName("timer"))[0]);
+    console.log("changingMapsCSS");
+    var gameWidth = document.getElementById('game').clientWidth;
+    var gameHeight = document.getElementById('game').clientHeight;
+    var sizeOfBlock = Math.min([Math.floor(100*gameWidth/mapWidth), Math.floor(100*gameHeight/mapHeight)]);
+    console.log("size of blocks", sizeOfBlock);
+    //console.log("divs", document.getElementById('game').getElementsByTagName("div"));
+    Array.from(document.getElementById('game').getElementsByTagName("div")).forEach(e => {
+        e.style.width = sizeOfBlock + "px";
+        e.style.height = sizeOfBlock + "px";
+    });
 }
 
 function gameStarted() {
     console.log('game started');
-    //serverConnection.requestID();
+    gameRunning = true;
     
     onkeypress = function(e) {
+        if (!gameRunning) return;
         switch (String.fromCharCode(e.keyCode)) {
             case 'w':
                 serverConnection.sendChange('w');
@@ -53,7 +62,8 @@ function gameStarted() {
 
 function gameFinished(){
     console.log('game finished');
-    document.onkeypress = null;
+    gameRunning = false;
+    onkeypress = null;
 }
 
 export default savePreparationData;

@@ -13,7 +13,7 @@ class GameState {
         this.gameLogic = new GameLogic(this.map);
         this.started = false;
         this.pacman; //id of player
-        this.gameTime = 30; // in seconds;
+        this.gameTime = 60; // in seconds;
 
         this.ghostSpeed = 290;
         this.pacmanSpeed = 190;

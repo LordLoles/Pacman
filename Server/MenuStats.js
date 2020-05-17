@@ -52,7 +52,7 @@ class MenuStats {
                 allReses.push(res);
             }
         }
-        allReses.sort((a,b) => {var p = b.Points - a.Points; if (p) return p; else return (b.Time - a.Time);});
+        allReses.sort((a,b) => {var p = b.Points - a.Points; if (p != 0) return p; else return (b.Time - a.Time);});
 
         if (allReses.length == 0) return -1;
         return allReses[0].IDPlayer;
@@ -119,19 +119,27 @@ class MenuStats {
             if (resID) {
                 var result = await this.DBConnection.gameResultByID(resID);
                 var player = await this.DBConnection.findPlayerByID(result.IDPlayer);
-                result[PlayerName] = player.Name;
+                result.PlayerName = player.Name;
                 allResults.push(result);
             }
         }
 
+        allResults.sort((a,b) => {var p = b.Points - a.Points; if (p != 0) return p; else return (b.Time - a.Time);});
 
-        var text = '<div id="bigger">Game statistics</div>' +
-        '<div id="bigger">' + game.Date + '</div>' +
+        var text = '<div class="empty"></div>' +
+        '<div class="gameStatsText">' +
+        '<p id="bigger">Game statistics</p>' +
+        '<p id="smaller">' + game.Date + '</p></div>' +
         '<div id="gameResults"><table>' +
-        '<tr><th id="smaller">Player</th><th id="smaller">Points</th><th id="smaller">Time pacman</th></tr>';
+        '<tr><th id="smaller">Player</th><th id="smaller">Points</th><th id="smaller">Time as pacman</th></tr>';
 
-        allResults.forEach(e =>{
-            todo[]
+        allResults.forEach(e => {
+            text += 
+            '<tr>' +
+                '<td class="playerOfGameStats" id="' + e.IDPlayer + '"><span class="yHover">' + e.PlayerName + '</span></td>' +
+                '<td><span>' + e.Points + '</span></td>' +
+                '<td><span>' + e.Time + '</span></td>' +
+            '</tr>'
         });
 
         text += '</table></div>';
