@@ -1,66 +1,31 @@
 .wall {
-    width: 50px;
-    height: 50px;
     background-image: url('./Assets/wall.png');
-    background-size: 100%;
-    display: inline-block;
 }
 .coin {
-    width: 50px;
-    height: 50px;
     background-image: url('./Assets/coin.png');
-    background-size: 100%;
-    display: inline-block;
 }
 .background {
-    width: 50px;
-    height: 50px;
     background-image: url('./Assets/bg.png');
-    background-size: 100%;
-    display: inline-block;
 }
 .pacman {
-    width: 50px;
-    height: 50px;
     background-image: url('./Assets/pacman.png');
-    background-size: 100%;
-    display: inline-block;
 }
 .ghost0 {
-    width: 50px;
-    height: 50px;
-    display: inline-block;
     background-image: url('./Assets/ghost0.png');
-    background-size: 100%;
 }
 .ghost1 {
-    width: 50px;
-    height: 50px;
-    display: inline-block;
     background-image: url('./Assets/ghost1.png');
-    background-size: 100%;
 }
 .ghost2 {
-    width: 50px;
-    height: 50px;
-    display: inline-block;
     background-image: url('./Assets/ghost2.png');
-    background-size: 100%;
 }
 .ghost3 {
-    width: 50px;
-    height: 50px;
-    display: inline-block;
     background-image: url('./Assets/ghost3.png');
-    background-size: 100%;
 }
 .ghost4 {
-    width: 50px;
-    height: 50px;
-    display: inline-block;
     background-image: url('./Assets/ghost4.png');
-    background-size: 100%;
 }
+
 .color0 {
     color: rgb(126, 223, 255);
 }

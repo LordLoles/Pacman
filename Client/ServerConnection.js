@@ -45,12 +45,11 @@ class ServerConnection {
         var display = this.display;
         var gameStart = this.gameStart;
         var gameFin = this.gameFin;
-        var changeMapsCSS = this.changeMapsCSS;
 
         this.socket.on('change', function(state){
             display.displayWorld(state.world);
             display.displayGameInfo(state.gameInfo);
-            //changeMapsCSS();
+            
         });
         this.socket.on('gameStarted', function(){
             gameStart();

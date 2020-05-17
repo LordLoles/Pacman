@@ -1,0 +1,6 @@
+.wall, .coin, .background, .pacman, .ghost0, .ghost1, .ghost2, .ghost3, .ghost4{
+    width: 42px;
+    height: 42px;
+    display: inline-block;
+    background-size: 100%;
+}
