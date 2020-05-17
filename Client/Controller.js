@@ -21,6 +21,9 @@ function changeMapsCSS(){
     if (!gameRunning) return;
     console.log("changing CSS");
 
+    var gameWidth = document.getElementById('game').clientWidth;
+    var gameHeight = document.getElementById('game').clientHeight;
+
     var sizeOfBlock = Math.min([Math.floor(100*gameWidth/mapWidth), Math.floor(100*gameHeight/mapHeight)]);
 
     var elements = ["wall", "coin", "background", "pacman", "ghost0", "ghost1", "ghost2", "ghost3", "ghost4"];
@@ -53,6 +56,7 @@ function changeMapsCSS(){
 function gameStarted() {
     console.log('game started');
     gameRunning = true;
+    changeMapsCSS();
     
     onkeypress = function(e) {
         if (!gameRunning) return;

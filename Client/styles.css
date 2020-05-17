@@ -26,8 +26,8 @@
     background-image: url('./Assets/ghost4.png');
 }
 .wall, .coin, .background, .pacman, .ghost0, .ghost1, .ghost2, .ghost3, .ghost4{
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     display: inline-block;
     background-size: 100%;
 }
