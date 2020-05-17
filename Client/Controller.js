@@ -1,7 +1,5 @@
 import ServerConnection from './ServerConnection.js';
 
-import fs from "fs";
-
 var serverConnection = new ServerConnection(gameStarted, gameFinished, changeMapsCSS);
 var id;
 var mapWidth;
@@ -9,7 +7,7 @@ var mapHeight;
 var gameRunning = false;
 
 
-document.getElementsByTagName("BODY")[0].onresize = changeMapsCSS;
+//document.getElementsByTagName("BODY")[0].onresize = changeMapsCSS;
 
 
 function savePreparationData(idP, widthP, heightP){
@@ -18,23 +16,26 @@ function savePreparationData(idP, widthP, heightP){
     mapHeight = heightP;
 }
 
-//funkcia sa nikdy n
+//funkcia sa nikdy nevola
 function changeMapsCSS(){
     if (!gameRunning) return;
     console.log("changing CSS");
 
     var sizeOfBlock = Math.min([Math.floor(100*gameWidth/mapWidth), Math.floor(100*gameHeight/mapHeight)]);
 
-    var data = '.wall, .coin, .background, .pacman, .ghost0, .ghost1, .ghost2, .ghost3, .ghost4{' +
-    '    width: ' + sizeOfBlock + 'px;' +
-    '    height: ' + sizeOfBlock + 'px;' +
-    '    display: inline-block;' +
-    '    background-size: 100%;' +
-    '}';
+    var elements = ["wall", "coin", "background", "pacman", "ghost0", "ghost1", "ghost2", "ghost3", "ghost4"];
 
+    elements.forEach(e => {
+        Array.from(document.getElementsByClassName(e)).forEach(d => {
+            d.style.width = sizeOfBlock + "px";
+            d.style.height = sizeOfBlock + "px";
+        });
+    });
+
+    /*
     fs.writeFile('./stylesGame.css', data, function (err){
         if (err) throw err;
-    });
+    });*/
 
     /*
     if (!gameRunning) return;
